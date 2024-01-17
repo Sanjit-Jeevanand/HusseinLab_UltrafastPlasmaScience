@@ -1,0 +1,1 @@
+This is for the viron implementation of LIBSGUI, refactored and optimized by Liam to work with the Viron laser, stellernet spectrometers, newport XPS stages, and the oscilloscope
