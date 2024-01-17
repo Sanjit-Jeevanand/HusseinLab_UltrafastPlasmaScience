@@ -1,13 +1,14 @@
 # LIBS GUI v7, 2023-11-14
-# Shubho Mohajan, Ying Wan, Dr. Nicholas Beier, Dr. Amina Hussein
+# Based on Shubho Mohajan, Ying Wan, Dr. Nicholas Beier, Dr. Amina Hussein
+# Adapted for use with the Viron laser and optimized by Liam Droog
 # University of Alberta, ECE Department
 
 from PyQt5 import QtWidgets, uic, QtGui, QtCore
 import sys, threading, h5py
 from fractions import Fraction
-from XPS import XPS
 import json
-import visa
+import pyvisa as visa
+from multiprocessing.pool import ThreadPool
 
 from pyqtgraph import PlotWidget
 import pyqtgraph as pg
@@ -22,17 +23,41 @@ from math import floor
 import instruments as ik
 import quantities as pq
       
-
 #importing resources for stellerNet
 import time, logging
 import numpy as np
-# import the usb driver
-# import stellarnet_driver3 as sn
-import stellarnet_driver3 as sn
+
+
+# Spectrometer drivers:
+sn_driver_installed = False
+try:
+    import stellarnet_driver3 as sn
+except ImportError:
+    print("Stellarnet driver not installed")
+else:
+    sn_driver_installed = True
+    
+# XPS Drivers:
+xps_driver_installed = False
+try:
+    from XPS import XPS
+except ImportError:
+    print("XPS driver not installed")
+else:
+    xps_driver_installed = True
+
 import matplotlib.pyplot as plt
+
+
 logging.basicConfig(format='%(asctime)s %(message)s')
 
-sn.installDeviceDriver()
+def wavelengthCalibration(coeffs):
+    pixels = np.arange(2048)
+    wave = coeffs[2]+coeffs[0]*pixels/2+coeffs[1]*(pixels/2)**2+coeffs[3]*(pixels/2)**3
+    return wave
+  
+#This doesn't need to run every time  
+#sn.installDeviceDriver()
 
 #GUI Design file importing here (qt design file)
 qtcreator_file  = "LIBS_GUI_Multiple_Spectromters_with_XPS_Oci.ui" # Enter file here.
@@ -41,146 +66,69 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(qtcreator_file)
 #Connecting all hardwares
 
 # Connect Delay Generator
-ins = ik.srs.SRSDG645.open_serial('COM13', 9600) # dg645
+dg645_connected = False
+try:
+    ins = ik.srs.SRSDG645.open_serial('COM4', 9600) # dg645
+except:
+    print("Delay Generator not connected")
+else:
+    dg645_connected = True
+    print("Delay Generator connected")
+# -------------------------------
+# set external falling trigger, single shot mode
+# ins.sendcmd("TSRC 4")
+# set 2V TTL threshold
+# ins.sendcmd("TLVL 2")
+# query status register to clear any abberant bits
+# _ = ins.query("INSR?")
+# -------------------------------
 
+# --------------------------------------------------------------------
 # Connect Spectrometers 
-spectrometer00, wav00 = sn.array_get_spec(2) # stellerNet 400-500 nm
-spectrometer11, wav11 = sn.array_get_spec(1) # stellerNet 300-400 nm
-spectrometer22, wav22 = sn.array_get_spec(0) # stellerNet 190-300 nm
+if sn_driver_installed:
+    
+    # should do checking if they're connected but nah not now #todo
+    
+    #These spectrometer IDs are device specific and don't change
+    spectrometerIDs = {'23020204':1,'23092809':3,'23092819':4,'23092829':5}
 
-spectrometer33, wav33 = sn.array_get_spec(3) # stellerNet 500-600 nm
-spectrometer44, wav44 = sn.array_get_spec(4) # stellerNet 600-700 nm
-spectrometer55, wav55 = sn.array_get_spec(5) # stellerNet 700-800 nm
+    #Sort through the devices and assign the ones with fixed IDs to their correct locations
+    devices = sn.find_devices()
+    devices = [i for i in devices]
+    spectrometers, waves = [0,0,0,0,0,0], [0,0,0,0,0,0]
+    for key,elem in spectrometerIDs.items():
+        for count,device in enumerate(devices):
+            if device.get_device_id() == key:
+                spectrometers[elem] = device
+                coeffs = device.get_config()['coeffs']
+                waves[elem] = wavelengthCalibration(coeffs)
+                devices.pop(count)
 
-# sn.array_get_spec(#num) connect the spectrometers randomly. To ensure the wavelength range 
-#here doing some conditional management
+    #The UV and 400-500 nm have no IDs and are assigned random ones. However, we can use their coefficients to determine which is which
+    if devices[0].get_config()['coeffs'][2] < devices[1].get_config()['coeffs'][2]:
+        spectrometers[0] = devices[0]
+        waves[0] = wavelengthCalibration(devices[0].get_config()['coeffs'])
+        spectrometers[2] = devices[1]
+        waves[2] = wavelengthCalibration(devices[1].get_config()['coeffs'])
+    else:
+        spectrometers[2] = devices[0]
+        waves[2] = wavelengthCalibration(devices[0].get_config()['coeffs'])
+        spectrometers[0] = devices[1]
+        waves[0] = wavelengthCalibration(devices[1].get_config()['coeffs'])
 
-# For wav00
-if 250 >= np.min(wav00) and 250 <= np.max(wav00): # to ensure spectrometer2 is 190-300 nm
-    wav2 = wav00
-    spectrometer2 = spectrometer00
-if 350 >= np.min(wav00) and 350 <= np.max(wav00): # to ensure spectrometer1 is 300-400 nm
-    wav1 = wav00
-    spectrometer1 = spectrometer00
-if 450 >= np.min(wav00) and 450 <= np.max(wav00): # to ensure spectrometer1 is 400-500 nm
-    wav0 = wav00
-    spectrometer0 = spectrometer00
-if 550 >= np.min(wav00) and 550 <= np.max(wav00): # to ensure spectrometer1 is 500-600 nm
-    wav3 = wav00
-    spectrometer3 = spectrometer00
-if 650 >= np.min(wav00) and 650 <= np.max(wav00): # to ensure spectrometer1 is 600-700 nm
-    wav4 = wav00
-    spectrometer4 = spectrometer00
-if 750 >= np.min(wav00) and 750 <= np.max(wav00): # to ensure spectrometer1 is 500-600 nm
-    wav5 = wav00
-    spectrometer5 = spectrometer00
+    [wav2,wav1,wav0,wav3,wav4,wav5] = waves
+    [spectrometer2,spectrometer1,spectrometer0,spectrometer3,spectrometer4,spectrometer5] = spectrometers
 
-# For wav11
-if 250 >= np.min(wav11) and 250 <= np.max(wav11): # to ensure spectrometer2 is 190-300 nm
-    wav2 = wav11
-    spectrometer2 = spectrometer11
-if 350 >= np.min(wav11) and 350 <= np.max(wav11): # to ensure spectrometer1 is 300-400 nm
-    wav1 = wav11
-    spectrometer1 = spectrometer11
-if 450 >= np.min(wav11) and 450 <= np.max(wav11): # to ensure spectrometer1 is 400-500 nm
-    wav0 = wav11
-    spectrometer0 = spectrometer11
-if 550 >= np.min(wav11) and 550 <= np.max(wav11): # to ensure spectrometer1 is 500-600 nm
-    wav3 = wav11
-    spectrometer3 = spectrometer11
-if 650 >= np.min(wav11) and 650 <= np.max(wav11): # to ensure spectrometer1 is 600-700 nm
-    wav4 = wav11
-    spectrometer4 = spectrometer11
-if 750 >= np.min(wav11) and 750 <= np.max(wav11): # to ensure spectrometer1 is 500-600 nm
-    wav5 = wav11
-    spectrometer5 = spectrometer11
-    
-# For wav22
-if 250 >= np.min(wav22) and 250 <= np.max(wav22): # to ensure spectrometer2 is 190-300 nm
-    wav2 = wav22
-    spectrometer2 = spectrometer22
-if 350 >= np.min(wav22) and 350 <= np.max(wav22): # to ensure spectrometer1 is 300-400 nm
-    wav1 = wav22
-    spectrometer1 = spectrometer22
-if 450 >= np.min(wav22) and 450 <= np.max(wav22): # to ensure spectrometer1 is 400-500 nm
-    wav0 = wav22
-    spectrometer0 = spectrometer22
-if 550 >= np.min(wav22) and 550 <= np.max(wav22): # to ensure spectrometer1 is 500-600 nm
-    wav3 = wav22
-    spectrometer3 = spectrometer22
-if 650 >= np.min(wav22) and 650 <= np.max(wav22): # to ensure spectrometer1 is 600-700 nm
-    wav4 = wav22
-    spectrometer4 = spectrometer22
-if 750 >= np.min(wav22) and 750 <= np.max(wav22): # to ensure spectrometer1 is 500-600 nm
-    wav5 = wav22
-    spectrometer5 = spectrometer22
-    
-# For wav33
-if 250 >= np.min(wav33) and 250 <= np.max(wav33): # to ensure spectrometer2 is 190-300 nm
-    wav2 = wav33
-    spectrometer2 = spectrometer33
-if 350 >= np.min(wav33) and 350 <= np.max(wav33): # to ensure spectrometer1 is 300-400 nm
-    wav1 = wav33
-    spectrometer1 = spectrometer33
-if 450 >= np.min(wav33) and 450 <= np.max(wav33): # to ensure spectrometer1 is 400-500 nm
-    wav0 = wav33
-    spectrometer0 = spectrometer33
-if 550 >= np.min(wav33) and 550 <= np.max(wav33): # to ensure spectrometer1 is 500-600 nm
-    wav3 = wav33
-    spectrometer3 = spectrometer33
-if 650 >= np.min(wav33) and 650 <= np.max(wav33): # to ensure spectrometer1 is 600-700 nm
-    wav4 = wav33
-    spectrometer4 = spectrometer33
-if 750 >= np.min(wav33) and 750 <= np.max(wav33): # to ensure spectrometer1 is 500-600 nm
-    wav5 = wav33
-    spectrometer5 = spectrometer33
-    
-# For wav44
-if 250 >= np.min(wav44) and 250 <= np.max(wav44): # to ensure spectrometer2 is 190-300 nm
-    wav2 = wav44
-    spectrometer2 = spectrometer44
-if 350 >= np.min(wav44) and 350 <= np.max(wav44): # to ensure spectrometer1 is 300-400 nm
-    wav1 = wav44
-    spectrometer1 = spectrometer44
-if 450 >= np.min(wav44) and 450 <= np.max(wav44): # to ensure spectrometer1 is 400-500 nm
-    wav0 = wav44
-    spectrometer0 = spectrometer44
-if 550 >= np.min(wav44) and 550 <= np.max(wav44): # to ensure spectrometer1 is 500-600 nm
-    wav3 = wav44
-    spectrometer3 = spectrometer44
-if 650 >= np.min(wav44) and 650 <= np.max(wav44): # to ensure spectrometer1 is 600-700 nm
-    wav4 = wav44
-    spectrometer4 = spectrometer44
-if 750 >= np.min(wav44) and 750 <= np.max(wav44): # to ensure spectrometer1 is 500-600 nm
-    wav5 = wav44
-    spectrometer5 = spectrometer44
-    
-# For wav55
-if 250 >= np.min(wav55) and 250 <= np.max(wav55): # to ensure spectrometer2 is 190-300 nm
-    wav2 = wav55
-    spectrometer2 = spectrometer55
-if 350 >= np.min(wav55) and 350 <= np.max(wav55): # to ensure spectrometer1 is 300-400 nm
-    wav1 = wav55
-    spectrometer1 = spectrometer55
-if 450 >= np.min(wav55) and 450 <= np.max(wav55): # to ensure spectrometer1 is 400-500 nm
-    wav0 = wav55
-    spectrometer0 = spectrometer55
-if 550 >= np.min(wav55) and 550 <= np.max(wav55): # to ensure spectrometer1 is 500-600 nm
-    wav3 = wav55
-    spectrometer3 = spectrometer55
-if 650 >= np.min(wav55) and 650 <= np.max(wav55): # to ensure spectrometer1 is 600-700 nm
-    wav4 = wav55
-    spectrometer4 = spectrometer55
-if 750 >= np.min(wav55) and 750 <= np.max(wav55): # to ensure spectrometer1 is 500-600 nm
-    wav5 = wav55
-    spectrometer5 = spectrometer55
-    
-scansavg = 1
-smooth = 1
+    scansavg = 1
+    smooth = 1
+# --------------------------------------------------------------------
 
 # Connect to the oscilloscope
-rm = visa.ResourceManager()
-scope = rm.open_resource('USB0::0x0699::0x03C7::C020817::INSTR')
+# ----------------------------
+# rm = visa.ResourceManager()
+# scope = rm.open_resource('USB0::0x0699::0x03C7::C020817::INSTR')
+# ----------------------------
+
 
 #Global variables for data saving and plotting
 data_stellar0 = None # wavelength and intensity for stellerNet
@@ -190,7 +138,7 @@ data_stellar3 = None
 data_stellar4 = None
 data_stellar5 = None
 
-data_oci = None
+# data_oci = None
 
 intensity_steller0_all = np.zeros((2048, 2)) # for storing previous shot stellernet intensity
 intensity_steller1_all = np.zeros((2048, 2))
@@ -209,28 +157,54 @@ data_stellar5_bkg = np.zeros((2048, 1))
 
 
 class StellerNet_functions:
-    
-    #function for getting spectrum f rom stellArNet
-    def getSpectrum(spectrometer, wav, inttime, scansavg, smooth):
-        logging.warning('requesting spectrum')
-        spectrometer['device'].set_config(int_time=inttime, scans_to_avg=scansavg, x_smooth=smooth)
-        sn.setTempComp(spectrometer, True) 
-        spectrum = sn.array_spectrum(spectrometer, wav)
-        logging.warning('recieved spectrum')
+    #function for getting spectrum from stellarNet
+    def init_unit(spectrometer, inttime, scansavg, smooth):
+        spectrometer.set_config(int_time=inttime, scans_to_avg=scansavg, x_smooth=smooth,temp_comp=True)
+        
+    def getSpectrum(spectrometer):
+        spectrum = spectrometer.read_spectrum()
         return spectrum 
     
-    # function external triger of stellarNet    
-    def external_trigger(spectrometer,trigger):
-        sn.ext_trig(spectrometer,trigger)    
+    def external_trigger(spectrometer, timeout):
+        # trigger = true disables timeout
+        spectrometer.extrig(timeout)
+
+# need to double check between this and initalize_spectrometers for consistency, then move on to adding threading
+class StellerNetTriggerThread(threading.Thread):
+    def __init__(self, spectrometer, inttime):
+        super(StellerNetTriggerThread, self).__init__()
+        self.spectrometer = spectrometer
+        self.inttime = inttime
+        self.terminate = threading.Event()
+        self.latest_spectrum = None
+        self.lock = threading.Lock()
+    def set_ext_trig(self):
+        StellerNet_functions.external_trigger(self.spectrometer, True)
+
+    def get_spectrum(self):
+        while not self.terminate.is_set():
+            spectrum = StellerNet_functions.getSpectrum(self.spectrometer)
+            # Update the latest_spectrum in a thread-safe manner
+            with self.lock:
+                self.latest_spectrum = spectrum
+
+    def set_int_time(self, inttime):
+        self.inttime = inttime
+        self.spectrometer.init_unit(inttime, scansavg=1, smooth=1)
+
+    def get_latest_spectrum(self):
+        # Retrieve the latest_spectrum in a thread-safe manner
+        with self.lock:
+            return self.latest_spectrum
 
 
 class StellerNet0TriggerThread(threading.Thread):
     def __init__(self, inttime):
-        super(StellerNet0TriggerThread,self).__init__()
+        super(StellerNet0TriggerThread, self).__init__()
         self.inttime = inttime
         global data_stellar0
         logging.warning('displaying spectrum')
-        StellerNet_functions.external_trigger(spectrometer0,True)
+        StellerNet_functions.external_trigger(spectrometer0, True)
         data_stellar0 = StellerNet_functions.getSpectrum(spectrometer0, wav0, inttime, scansavg, smooth)
 
 
@@ -280,67 +254,74 @@ class StellerNet5TriggerThread(threading.Thread):
         StellerNet_functions.external_trigger(spectrometer5,True)
         data_stellar5 = StellerNet_functions.getSpectrum(spectrometer5, wav5, inttime, scansavg, smooth)
         
-class ocilloscopeThread(threading.Thread):
-    def __init__(self, data_source, trig_source, v_div, t_div, rec_length):
-        super(ocilloscopeThread,self).__init__()
-        # self.start = start
-        global data_oci
-        data_oci=self.ocilloscope(data_source, trig_source, v_div, t_div, rec_length)
-    def ocilloscope(self, data_source, trig_source, v_div, t_div, rec_length):
-        # Set up acquisition parameters
-        scope.write('DATa:SOUrce '+ data_source)   # Select channel 4 as data source
-        scope.write('DATa:ENCdg RIBinary')   # Set binary data encoding
-        scope.write('WFMPre:XINcr?')   # Query the x-axis increment
-        xincr = float(scope.read())   # Convert the string response to a float  
-        scope.write('WFMPre:YMUlt?')   # Query the y-axis scale
-        yscale = float(scope.read())   # Convert the string response to a float
-        scope.write('TRIGger:EDGE:SOURce '+ trig_source)   # Set the trigger source to channel 4
-        scope.write('TRIGger:EDGE:SLOPe POSitive')   # Set the trigger slope to positive
-        # scope.write('TRIGger:LEVel CH1,0')   # Set the trigger level to 0V
-        scope.write('DAT:STAR 1')
-        scope.write('DAT:STOP '+ rec_length)
-        scope.write('DAT:STOP '+ data_source)
-        scope.write('CH1:SCALE '+ v_div)  # Set the vertical scale of channel 4 to 1V/div
-        scope.write('HOR:SCALE '+ t_div) # Set the horizontal scale to 1ms/div
+# class ocilloscopeThread(threading.Thread):
+#     def __init__(self, data_source, trig_source, v_div, t_div, rec_length):
+#         super(ocilloscopeThread,self).__init__()
+#         # self.start = start
+#         global data_oci
+#         data_oci=self.ocilloscope(data_source, trig_source, v_div, t_div, rec_length)
+#     def ocilloscope(self, data_source, trig_source, v_div, t_div, rec_length):
+#         # Set up acquisition parameters
+#         scope.write('DATa:SOUrce '+ data_source)   # Select channel 4 as data source
+#         scope.write('DATa:ENCdg RIBinary')   # Set binary data encoding
+#         scope.write('WFMPre:XINcr?')   # Query the x-axis increment
+#         xincr = float(scope.read())   # Convert the string response to a float  
+#         scope.write('WFMPre:YMUlt?')   # Query the y-axis scale
+#         yscale = float(scope.read())   # Convert the string response to a float
+#         scope.write('TRIGger:EDGE:SOURce '+ trig_source)   # Set the trigger source to channel 4
+#         scope.write('TRIGger:EDGE:SLOPe POSitive')   # Set the trigger slope to positive
+#         # scope.write('TRIGger:LEVel CH1,0')   # Set the trigger level to 0V
+#         scope.write('DAT:STAR 1')
+#         scope.write('DAT:STOP '+ rec_length)
+#         scope.write('DAT:STOP '+ data_source)
+#         scope.write('CH1:SCALE '+ v_div)  # Set the vertical scale of channel 4 to 1V/div
+#         scope.write('HOR:SCALE '+ t_div) # Set the horizontal scale to 1ms/div
         
-        # Arm the scope and wait for trigger
-        scope.write('ACQuire:STOPAfter SEQuence')   # Stop acquisition after one sequence
-        scope.write('ACQuire:STATE ON')   # Start acquisition
-        scope.query('*OPC?')   # Wait for acquisition to complete
+#         # Arm the scope and wait for trigger
+#         scope.write('ACQuire:STOPAfter SEQuence')   # Stop acquisition after one sequence
+#         scope.write('ACQuire:STATE ON')   # Start acquisition
+#         scope.query('*OPC?')   # Wait for acquisition to complete
 
-        # Read the acquired data
-        scope.write('CURVE?')   # Query the waveform data
-        data = scope.read_raw()   # Read the raw binary data
-        headerlen = 2 + int(data[1])   # Determine the length of the header
-        header = data[:headerlen]   # Extract the header
-        ADC_wave = data[headerlen:-1]   # Extract the ADC waveform data
-        ADC_wave = np.frombuffer(ADC_wave, 'B')   # Convert the binary data to integers
-        ADC_wave = ADC_wave - 127   # Convert the ADC values to signed integers
-        Volts_wave = yscale * ADC_wave   # Convert the ADC values to volts
-        Volts_wave = Volts_wave - np.mean(Volts_wave)
+#         # Read the acquired data
+#         scope.write('CURVE?')   # Query the waveform data
+#         data = scope.read_raw()   # Read the raw binary data
+#         headerlen = 2 + int(data[1])   # Determine the length of the header
+#         header = data[:headerlen]   # Extract the header
+#         ADC_wave = data[headerlen:-1]   # Extract the ADC waveform data
+#         ADC_wave = np.frombuffer(ADC_wave, 'B')   # Convert the binary data to integers
+#         ADC_wave = ADC_wave - 127   # Convert the ADC values to signed integers
+#         Volts_wave = yscale * ADC_wave   # Convert the ADC values to volts
+#         Volts_wave = Volts_wave - np.mean(Volts_wave)
         
-        # Extract the x-axis data
-        xzero = float(scope.query('WFMPre:XZEro?'))
-        Time_wave = np.arange(len(Volts_wave)) * xincr + xzero
+#         # Extract the x-axis data
+#         xzero = float(scope.query('WFMPre:XZEro?'))
+#         Time_wave = np.arange(len(Volts_wave)) * xincr + xzero
         
-        # Time_wave = np.arange(0, xincr * len(Volts_wave), xincr)   # Generate the time axis
-        # Time_wave = np.linspace(0, xincr * len(Volts_wave), len(Volts_wave))   # Generate the time axis
-        data_oci = np.array([Time_wave, Volts_wave])
-        data_oci = data_oci.T
+#         # Time_wave = np.arange(0, xincr * len(Volts_wave), xincr)   # Generate the time axis
+#         # Time_wave = np.linspace(0, xincr * len(Volts_wave), len(Volts_wave))   # Generate the time axis
+#         data_oci = np.array([Time_wave, Volts_wave])
+#         data_oci = data_oci.T
         
-        return data_oci
+#         return data_oci
         
-        # self.plot_graph_10.clear()
-        # self.plot_graph_10.plot(Time_wave, Volts_wave, pen='r')
+#         # self.plot_graph_10.clear()
+#         # self.plot_graph_10.plot(Time_wave, Volts_wave, pen='r')
 
 
 class FireThread(threading.Thread):
     def __init__(self, clicked):
         super(FireThread, self).__init__()
         self.clicked = clicked
-        ins.sendcmd('TSRC 5') 
+        # ins.sendcmd('TSRC 5') 
+        # ins.sendcmd('*TRG')
         ins.sendcmd('*TRG')
-
+        # --------------------------------------------------------------------
+        insr = int(ins.query("INSR?"))
+        while not insr & 0b1:
+            insr = int(ins.query("INSR?"))
+            time.sleep(0.05)
+        # at this point the laser has fired and we can continue
+        # --------------------------------------------------------------------
 
 # Main class for GUI
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -348,8 +329,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
-
-
         
         # STAGE CONTROL ----------------------------------------------------------------------        
         # self.setupUi(self)
@@ -434,19 +413,22 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         
 # Ocilloscope ----------------------------------------------------------------------   
 
-        # self.data_source_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-        self.data_source_line.textChanged.connect(lambda: self.ocilloscope_inp('data_source'))
-        # self.trig_source_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-        self.trig_source_line.textChanged.connect(lambda: self.ocilloscope_inp('trig_source'))
-        self.rec_length_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-        self.rec_length_line.textChanged.connect(lambda: self.ocilloscope_inp('rec_length'))
-        self.v_div_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-        self.v_div_line.textChanged.connect(lambda: self.ocilloscope_inp('v_div'))
-        self.t_div_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-        self.t_div_line.textChanged.connect(lambda: self.ocilloscope_inp('t_div'))
+
+        # commenting out for now as we don't need it yet
+            
+        # # self.data_source_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+        # self.data_source_line.textChanged.connect(lambda: self.ocilloscope_inp('data_source'))
+        # # self.trig_source_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+        # self.trig_source_line.textChanged.connect(lambda: self.ocilloscope_inp('trig_source'))
+        # self.rec_length_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+        # self.rec_length_line.textChanged.connect(lambda: self.ocilloscope_inp('rec_length'))
+        # self.v_div_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+        # self.v_div_line.textChanged.connect(lambda: self.ocilloscope_inp('v_div'))
+        # self.t_div_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+        # self.t_div_line.textChanged.connect(lambda: self.ocilloscope_inp('t_div'))
         
-        # self.Time_data = 0
-        # self.Volts_data=0
+        # # self.Time_data = 0
+        # # self.Volts_data=0
 
 
 
@@ -517,6 +499,16 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.same_loc_shot = 1
         self.num_shots_same_loc = int(self.num_shots_same_loc_txt.text())
         self.num_shots_same_loc_txt.textEdited.connect(lambda: self.raster_inp("shots_same_loc"))
+        
+        # # initalize threadpool of spectrometers:
+        # spectrometer_pool = ThreadPool(processes=6)
+        
+        # StellerNet0TrigThread = spectrometer_pool.apply_async
+        # StellerNet1TrigThread = spectrometer_pool.apply_async
+        # StellerNet2TrigThread = spectrometer_pool.apply_async
+        # StellerNet3TrigThread = spectrometer_pool.apply_async
+        # StellerNet4TrigThread = spectrometer_pool.apply_async
+        # StellerNet5TrigThread = spectrometer_pool.apply_async
 
     def read_json(self):
         '''
@@ -540,34 +532,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         for widget in self.Ocilloscope.children():
             if isinstance(widget, QtWidgets.QLineEdit):
                 widget.setText(inputs[str(widget.objectName())])
-
-
-    # def write_json(self):
-    #     '''
-    #     Writes gui inputs to .json file to load for next use.
-    #     '''
-    #     with open("gui_inputs2.json", "r+") as write_file:
-    #         inputs = json.load(write_file)
-
-    #         for widget in self.spectrometers.children():
-    #             if isinstance(widget, QtWidgets.QTextEdit):
-    #                 inputs[str(widget.objectName())] = widget.toPlainText()
-                    
-    #         for widget in self.dg.children():
-    #             if isinstance(widget, QtWidgets.QTextEdit):
-    #                 inputs[str(widget.objectName())] = widget.toPlainText()
-            
-    #         for widget in self.translationStage.children():
-    #             if isinstance(widget, QtWidgets.QLineEdit):
-    #                 inputs[str(widget.objectName())] = widget.text()
-
-    #         for widget in self.Ocilloscope.children():
-    #             if isinstance(widget, QtWidgets.QLineEdit):
-    #                 inputs[str(widget.objectName())] = widget.text()
-                
-    #         write_file.seek(0)
-    #         json.dump(inputs, write_file)
-    #         write_file.truncate
 
     def write_json(self):
         '''
@@ -663,6 +627,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         dir_path=QtWidgets.QFileDialog.getExistingDirectory(self,"Choose Directory","./")  # Change the 3rd parameter ("./") to change directory that browser opens in.
         self.SaveData_dir.setText(dir_path)
         
+    def initialize_spectrometers(spectrometers, inttime):
+        for i in spectrometers:
+            StellerNet_functions.init_unit(i, inttime, scansavg, smooth)
+        return [StellerNetTriggerThread(spectrometer, inttime) for spectrometer in spectrometers]
+
     def MySpectrometers(self):
         # Calling hardware threads   
         StellerNet0TrigThread = threading.Thread(target=StellerNet0TriggerThread, args=(self.inttime, ))
@@ -671,22 +640,30 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         StellerNet3TrigThread = threading.Thread(target=StellerNet3TriggerThread, args=(self.inttime, ))
         StellerNet4TrigThread = threading.Thread(target=StellerNet4TriggerThread, args=(self.inttime, ))
         StellerNet5TrigThread = threading.Thread(target=StellerNet5TriggerThread, args=(self.inttime, ))
-        ocilloscopeTrigThread = threading.Thread(target=ocilloscopeThread, args=(self.data_source,self.trig_source,self.v_div, self.t_div, self.rec_length))
+        # ocilloscopeTrigThread = threading.Thread(target=ocilloscopeThread, args=(self.data_source,self.trig_source,self.v_div, self.t_div, self.rec_length))
         Fire = threading.Thread(target=FireThread, args=(10, ))
 
         # Start Parallel Operation of hardwares
         # ThorlabsTrigThread.start()
+        
+        # Fire.start()
+        
+        
         StellerNet0TrigThread.start()
         StellerNet1TrigThread.start()
         StellerNet2TrigThread.start()
         StellerNet3TrigThread.start()
         StellerNet4TrigThread.start()
         StellerNet5TrigThread.start()
-        ocilloscopeTrigThread.start()
-        time.sleep(1)
-        Fire.start()
+        # ocilloscopeTrigThread.start()   # this is causing a crash as it times out
+
+        
+
         # data_oci = np.array(self.Time_data, self.Volts_data)
         
+
+        # Fire.join()
+        # should only proceed past here once the laser has fired
         # ThorlabsTrigThread.join()
         StellerNet0TrigThread.join()
         StellerNet1TrigThread.join()
@@ -694,9 +671,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         StellerNet3TrigThread.join()
         StellerNet4TrigThread.join()
         StellerNet5TrigThread.join()
-        ocilloscopeTrigThread.join()
-        Fire.join()     
+        
+        # ocilloscopeTrigThread.join()
+        # time.sleep(0.1)
 
+     
+
+
+        st = time.time()
         
         # calling variables for sending data from thread
         # global data_thor
@@ -706,7 +688,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         global data_stellar3
         global data_stellar4
         global data_stellar5        
-        global data_oci
+        # global data_oci
 
         global intensity_steller0_all
         global intensity_steller1_all
@@ -722,6 +704,29 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         global data_stellar4_bkg
         global data_stellar5_bkg
         
+        data_stellar0 = np.array(data_stellar0)
+        data_stellar1 = np.array(data_stellar1)
+        data_stellar2 = np.array(data_stellar2)
+        data_stellar3 = np.array(data_stellar3)
+        data_stellar4 = np.array(data_stellar4)
+        data_stellar5 = np.array(data_stellar5)
+        
+        data_stellar0 =  np.vstack([wav0, data_stellar0])
+        data_stellar1 =  np.vstack([wav1, data_stellar1])
+        data_stellar2 =  np.vstack([wav2, data_stellar2])
+        data_stellar3 =  np.vstack([wav3, data_stellar3])
+        data_stellar4 =  np.vstack([wav4, data_stellar4])
+        data_stellar5 =  np.vstack([wav5, data_stellar5])
+        
+        data_stellar0 = data_stellar0.T
+        data_stellar1 = data_stellar1.T
+        data_stellar2 = data_stellar2.T
+        data_stellar3 = data_stellar3.T
+        data_stellar4 = data_stellar4.T
+        data_stellar5 = data_stellar5.T
+        
+        print(data_stellar0.shape)
+        
 
         temp_steller0 = data_stellar0[:,1].reshape(2048,1)
         intensity_steller0_all = np.hstack([intensity_steller0_all, temp_steller0])
@@ -735,7 +740,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         intensity_steller4_all = np.hstack([intensity_steller4_all, temp_steller4])
         temp_steller5 = data_stellar5[:,1].reshape(2048,1)
         intensity_steller5_all = np.hstack([intensity_steller5_all, temp_steller5])
+        print("time taken to fetch data: ", str(time.time() - st))
         
+        st = time.time()
         #plotting
         if self.acquire_bkg.isChecked():
             data_stellar0_bkg = np.hstack([data_stellar0_bkg, data_stellar0[:,1].reshape(2048,1)])
@@ -757,77 +764,77 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.subtract_bkg.isChecked():
             if self.acquire_bkg.isChecked():
                 self.plot_graph_7.clear()
-                self.plot_graph_7.plot(data_stellar0[:,0],intensity_steller0_all[:,-1], pen='y')
-                self.plot_graph_7.plot(data_stellar1[:,0],intensity_steller1_all[:,-1], pen='c')
-                self.plot_graph_7.plot(data_stellar2[:,0],intensity_steller2_all[:,-1], pen='b')
-                self.plot_graph_7.plot(data_stellar3[:,0],intensity_steller3_all[:,-1], pen='g')
-                self.plot_graph_7.plot(data_stellar4[:,0],intensity_steller4_all[:,-1], pen='m')
-                self.plot_graph_7.plot(data_stellar5[:,0],intensity_steller5_all[:,-1], pen='r')
+                self.plot_graph_7.plot(wav0,intensity_steller0_all[:,-1], pen='k')
+                self.plot_graph_7.plot(wav1,intensity_steller1_all[:,-1], pen='c')
+                self.plot_graph_7.plot(wav2,intensity_steller2_all[:,-1], pen='b')
+                self.plot_graph_7.plot(wav3,intensity_steller3_all[:,-1], pen='g')
+                self.plot_graph_7.plot(wav4,intensity_steller4_all[:,-1], pen='m')
+                self.plot_graph_7.plot(wav5,intensity_steller5_all[:,-1], pen='r')
         
                 self.plot_graph_8.clear()
-                self.plot_graph_8.plot(data_stellar0[:,0],intensity_steller0_all[:,-2], pen='y')
-                self.plot_graph_8.plot(data_stellar1[:,0],intensity_steller1_all[:,-2], pen='c')
-                self.plot_graph_8.plot(data_stellar2[:,0],intensity_steller2_all[:,-2], pen='b')
-                self.plot_graph_8.plot(data_stellar3[:,0],intensity_steller3_all[:,-2], pen='g')
-                self.plot_graph_8.plot(data_stellar4[:,0],intensity_steller4_all[:,-2], pen='m')
-                self.plot_graph_8.plot(data_stellar5[:,0],intensity_steller5_all[:,-2], pen='r')
+                self.plot_graph_8.plot(wav0,intensity_steller0_all[:,-2], pen='k')
+                self.plot_graph_8.plot(wav1,intensity_steller1_all[:,-2], pen='c')
+                self.plot_graph_8.plot(wav2,intensity_steller2_all[:,-2], pen='b')
+                self.plot_graph_8.plot(wav3,intensity_steller3_all[:,-2], pen='g')
+                self.plot_graph_8.plot(wav4,intensity_steller4_all[:,-2], pen='m')
+                self.plot_graph_8.plot(wav5,intensity_steller5_all[:,-2], pen='r')
         
                 self.plot_graph_9.clear()
-                self.plot_graph_9.plot(data_stellar0[:,0],intensity_steller0_all[:,-3], pen='y')
-                self.plot_graph_9.plot(data_stellar1[:,0],intensity_steller1_all[:,-3], pen='c')
-                self.plot_graph_9.plot(data_stellar2[:,0],intensity_steller2_all[:,-3], pen='b')
-                self.plot_graph_9.plot(data_stellar3[:,0],intensity_steller3_all[:,-3], pen='g')
-                self.plot_graph_9.plot(data_stellar4[:,0],intensity_steller4_all[:,-3], pen='m')
-                self.plot_graph_9.plot(data_stellar5[:,0],intensity_steller5_all[:,-3], pen='r')
+                self.plot_graph_9.plot(wav0,intensity_steller0_all[:,-3], pen='k')
+                self.plot_graph_9.plot(wav1,intensity_steller1_all[:,-3], pen='c')
+                self.plot_graph_9.plot(wav2,intensity_steller2_all[:,-3], pen='b')
+                self.plot_graph_9.plot(wav3,intensity_steller3_all[:,-3], pen='g')
+                self.plot_graph_9.plot(wav4,intensity_steller4_all[:,-3], pen='m')
+                self.plot_graph_9.plot(wav5,intensity_steller5_all[:,-3], pen='r')
             else:
                 self.plot_graph_7.clear()
-                self.plot_graph_7.plot(data_stellar0[:,0].reshape(2048,),(intensity_steller0_all[:,-1].reshape(2048,)-avg_data_stellar0_bkg.reshape(2048,)), pen='y')
-                self.plot_graph_7.plot(data_stellar1[:,0].reshape(2048,),(intensity_steller1_all[:,-1].reshape(2048,)-avg_data_stellar1_bkg.reshape(2048,)), pen='c')
-                self.plot_graph_7.plot(data_stellar2[:,0].reshape(2048,),(intensity_steller2_all[:,-1].reshape(2048,)-avg_data_stellar2_bkg.reshape(2048,)), pen='b')
-                self.plot_graph_7.plot(data_stellar3[:,0].reshape(2048,),(intensity_steller3_all[:,-1].reshape(2048,)-avg_data_stellar3_bkg.reshape(2048,)), pen='g')
-                self.plot_graph_7.plot(data_stellar4[:,0].reshape(2048,),(intensity_steller4_all[:,-1].reshape(2048,)-avg_data_stellar4_bkg.reshape(2048,)), pen='m')
-                self.plot_graph_7.plot(data_stellar5[:,0].reshape(2048,),(intensity_steller5_all[:,-1].reshape(2048,)-avg_data_stellar5_bkg.reshape(2048,)), pen='r')
+                self.plot_graph_7.plot(wav0,(intensity_steller0_all[:,-1].reshape(2048,)-avg_data_stellar0_bkg.reshape(2048,)), pen='k')
+                self.plot_graph_7.plot(wav1,(intensity_steller1_all[:,-1].reshape(2048,)-avg_data_stellar1_bkg.reshape(2048,)), pen='c')
+                self.plot_graph_7.plot(wav2,(intensity_steller2_all[:,-1].reshape(2048,)-avg_data_stellar2_bkg.reshape(2048,)), pen='b')
+                self.plot_graph_7.plot(wav3,(intensity_steller3_all[:,-1].reshape(2048,)-avg_data_stellar3_bkg.reshape(2048,)), pen='g')
+                self.plot_graph_7.plot(wav4,(intensity_steller4_all[:,-1].reshape(2048,)-avg_data_stellar4_bkg.reshape(2048,)), pen='m')
+                self.plot_graph_7.plot(wav5,(intensity_steller5_all[:,-1].reshape(2048,)-avg_data_stellar5_bkg.reshape(2048,)), pen='r')
     
                 self.plot_graph_8.clear()
-                self.plot_graph_8.plot(data_stellar0[:,0].reshape(2048,),(intensity_steller0_all[:,-2].reshape(2048,)-avg_data_stellar0_bkg.reshape(2048,)), pen='y')
-                self.plot_graph_8.plot(data_stellar1[:,0].reshape(2048,),(intensity_steller1_all[:,-2].reshape(2048,)-avg_data_stellar1_bkg.reshape(2048,)), pen='c')
-                self.plot_graph_8.plot(data_stellar2[:,0].reshape(2048,),(intensity_steller2_all[:,-2].reshape(2048,)-avg_data_stellar2_bkg.reshape(2048,)), pen='b')
-                self.plot_graph_8.plot(data_stellar3[:,0].reshape(2048,),(intensity_steller3_all[:,-2].reshape(2048,)-avg_data_stellar3_bkg.reshape(2048,)), pen='g')
-                self.plot_graph_8.plot(data_stellar4[:,0].reshape(2048,),(intensity_steller4_all[:,-2].reshape(2048,)-avg_data_stellar4_bkg.reshape(2048,)), pen='m')
-                self.plot_graph_8.plot(data_stellar5[:,0].reshape(2048,),(intensity_steller5_all[:,-2].reshape(2048,)-avg_data_stellar5_bkg.reshape(2048,)), pen='r')
+                self.plot_graph_8.plot(wav0,(intensity_steller0_all[:,-2].reshape(2048,)-avg_data_stellar0_bkg.reshape(2048,)), pen='k')
+                self.plot_graph_8.plot(wav1,(intensity_steller1_all[:,-2].reshape(2048,)-avg_data_stellar1_bkg.reshape(2048,)), pen='c')
+                self.plot_graph_8.plot(wav2,(intensity_steller2_all[:,-2].reshape(2048,)-avg_data_stellar2_bkg.reshape(2048,)), pen='b')
+                self.plot_graph_8.plot(wav3,(intensity_steller3_all[:,-2].reshape(2048,)-avg_data_stellar3_bkg.reshape(2048,)), pen='g')
+                self.plot_graph_8.plot(wav4,(intensity_steller4_all[:,-2].reshape(2048,)-avg_data_stellar4_bkg.reshape(2048,)), pen='m')
+                self.plot_graph_8.plot(wav5,(intensity_steller5_all[:,-2].reshape(2048,)-avg_data_stellar5_bkg.reshape(2048,)), pen='r')
     
                 self.plot_graph_9.clear()
-                self.plot_graph_9.plot(data_stellar0[:,0].reshape(2048,),(intensity_steller0_all[:,-3].reshape(2048,)-avg_data_stellar0_bkg.reshape(2048,)), pen='y')
-                self.plot_graph_9.plot(data_stellar1[:,0].reshape(2048,),(intensity_steller1_all[:,-3].reshape(2048,)-avg_data_stellar1_bkg.reshape(2048,)), pen='c')
-                self.plot_graph_9.plot(data_stellar2[:,0].reshape(2048,),(intensity_steller2_all[:,-3].reshape(2048,)-avg_data_stellar2_bkg.reshape(2048,)), pen='b')
-                self.plot_graph_9.plot(data_stellar3[:,0].reshape(2048,),(intensity_steller3_all[:,-3].reshape(2048,)-avg_data_stellar3_bkg.reshape(2048,)), pen='g')
-                self.plot_graph_9.plot(data_stellar4[:,0].reshape(2048,),(intensity_steller4_all[:,-3].reshape(2048,)-avg_data_stellar4_bkg.reshape(2048,)), pen='m')
-                self.plot_graph_9.plot(data_stellar5[:,0].reshape(2048,),(intensity_steller5_all[:,-3].reshape(2048,)-avg_data_stellar5_bkg.reshape(2048,)), pen='r')
+                self.plot_graph_9.plot(wav0,(intensity_steller0_all[:,-3].reshape(2048,)-avg_data_stellar0_bkg.reshape(2048,)), pen='k')
+                self.plot_graph_9.plot(wav1,(intensity_steller1_all[:,-3].reshape(2048,)-avg_data_stellar1_bkg.reshape(2048,)), pen='c')
+                self.plot_graph_9.plot(wav2,(intensity_steller2_all[:,-3].reshape(2048,)-avg_data_stellar2_bkg.reshape(2048,)), pen='b')
+                self.plot_graph_9.plot(wav3,(intensity_steller3_all[:,-3].reshape(2048,)-avg_data_stellar3_bkg.reshape(2048,)), pen='g')
+                self.plot_graph_9.plot(wav4,(intensity_steller4_all[:,-3].reshape(2048,)-avg_data_stellar4_bkg.reshape(2048,)), pen='m')
+                self.plot_graph_9.plot(wav5,(intensity_steller5_all[:,-3].reshape(2048,)-avg_data_stellar5_bkg.reshape(2048,)), pen='r')
             
         else:
             self.plot_graph_7.clear()
-            self.plot_graph_7.plot(data_stellar0[:,0],intensity_steller0_all[:,-1], pen='y')
-            self.plot_graph_7.plot(data_stellar1[:,0],intensity_steller1_all[:,-1], pen='c')
-            self.plot_graph_7.plot(data_stellar2[:,0],intensity_steller2_all[:,-1], pen='b')
-            self.plot_graph_7.plot(data_stellar3[:,0],intensity_steller3_all[:,-1], pen='g')
-            self.plot_graph_7.plot(data_stellar4[:,0],intensity_steller4_all[:,-1], pen='m')
-            self.plot_graph_7.plot(data_stellar5[:,0],intensity_steller5_all[:,-1], pen='r')
+            self.plot_graph_7.plot(wav0,intensity_steller0_all[:,-1], pen='k')
+            self.plot_graph_7.plot(wav1,intensity_steller1_all[:,-1], pen='c')
+            self.plot_graph_7.plot(wav2,intensity_steller2_all[:,-1], pen='b')
+            self.plot_graph_7.plot(wav3,intensity_steller3_all[:,-1], pen='g')
+            self.plot_graph_7.plot(wav4,intensity_steller4_all[:,-1], pen='m')
+            self.plot_graph_7.plot(wav5,intensity_steller5_all[:,-1], pen='r')
     
             self.plot_graph_8.clear()
-            self.plot_graph_8.plot(data_stellar0[:,0],intensity_steller0_all[:,-2], pen='y')
-            self.plot_graph_8.plot(data_stellar1[:,0],intensity_steller1_all[:,-2], pen='c')
-            self.plot_graph_8.plot(data_stellar2[:,0],intensity_steller2_all[:,-2], pen='b')
-            self.plot_graph_8.plot(data_stellar3[:,0],intensity_steller3_all[:,-2], pen='g')
-            self.plot_graph_8.plot(data_stellar4[:,0],intensity_steller4_all[:,-2], pen='m')
-            self.plot_graph_8.plot(data_stellar5[:,0],intensity_steller5_all[:,-2], pen='r')
+            self.plot_graph_8.plot(wav0,intensity_steller0_all[:,-2], pen='k')
+            self.plot_graph_8.plot(wav1,intensity_steller1_all[:,-2], pen='c')
+            self.plot_graph_8.plot(wav2,intensity_steller2_all[:,-2], pen='b')
+            self.plot_graph_8.plot(wav3,intensity_steller3_all[:,-2], pen='g')
+            self.plot_graph_8.plot(wav4,intensity_steller4_all[:,-2], pen='m')
+            self.plot_graph_8.plot(wav5,intensity_steller5_all[:,-2], pen='r')
     
             self.plot_graph_9.clear()
-            self.plot_graph_9.plot(data_stellar0[:,0],intensity_steller0_all[:,-3], pen='y')
-            self.plot_graph_9.plot(data_stellar1[:,0],intensity_steller1_all[:,-3], pen='c')
-            self.plot_graph_9.plot(data_stellar2[:,0],intensity_steller2_all[:,-3], pen='b')
-            self.plot_graph_9.plot(data_stellar3[:,0],intensity_steller3_all[:,-3], pen='g')
-            self.plot_graph_9.plot(data_stellar4[:,0],intensity_steller4_all[:,-3], pen='m')
-            self.plot_graph_9.plot(data_stellar5[:,0],intensity_steller5_all[:,-3], pen='r')
+            self.plot_graph_9.plot(wav0,intensity_steller0_all[:,-3], pen='k')
+            self.plot_graph_9.plot(wav1,intensity_steller1_all[:,-3], pen='c')
+            self.plot_graph_9.plot(wav2,intensity_steller2_all[:,-3], pen='b')
+            self.plot_graph_9.plot(wav3,intensity_steller3_all[:,-3], pen='g')
+            self.plot_graph_9.plot(wav4,intensity_steller4_all[:,-3], pen='m')
+            self.plot_graph_9.plot(wav5,intensity_steller5_all[:,-3], pen='r')
         
         # Deleting 4th shot data for memory efficiency
         intensity_steller0_all = np.delete(intensity_steller0_all, 0, 1)
@@ -837,9 +844,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         intensity_steller4_all = np.delete(intensity_steller4_all, 0, 1)
         intensity_steller5_all = np.delete(intensity_steller5_all, 0, 1)
         
-        self.plot_graph_10.clear()
-        self.plot_graph_10.plot(data_oci[:,0], data_oci[:,1], pen='r')
+        # self.plot_graph_10.clear()
+        # self.plot_graph_10.plot(data_oci[:,0], data_oci[:,1], pen='r')
+        print("time taken to plot da stuff: ", str(time.time() - st))
         
+        st = time.time()
         #Save Data
         txtnum = self.file_num
         path_SaveData = self.SaveData_dir.toPlainText()
@@ -850,7 +859,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         StellarNetSpectrum_500_600nm = hdf.create_dataset('StellarNetSpectrum_500_600nm', data=data_stellar3)
         StellarNetSpectrum_600_700nm = hdf.create_dataset('StellarNetSpectrum_600_700nm', data=data_stellar4)
         StellarNetSpectrum_700_800nm = hdf.create_dataset('StellarNetSpectrum_700_800nm', data=data_stellar5)
-        Ocilloscope_data = hdf.create_dataset('Ocilloscope_data', data=data_oci)
+        # Ocilloscope_data = hdf.create_dataset('Ocilloscope_data', data=data_oci)
 
         abs_pos = [self.x_xps.getStagePosition(self.x_axis), self.y_xps.getStagePosition(self.y_axis)]
         hdf.attrs['LaserEnergy'] = self.Laser_Energy
@@ -864,7 +873,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         hdf.attrs['AbsoluteStageLocation'] = abs_pos
         hdf.attrs['OtherNotes'] = self.Other_Notes
         hdf.close()
-            
+        print("time taken to save da stuff: ", str(time.time() - st))
         self.file_num += 1
         
 # STAGE CONTROL ----------------------------------------------------------------------
@@ -893,7 +902,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.same_loc_shot +=1
 #---------------------------------------------------------------------------------------
     def reset(self, spectrometer):
-        spectrometer['device'].__del__()
+        spectrometer.__del__()
     
     def DisconnectAll(self):
         ins.sendcmd('IFRS 0') #close dg 645
