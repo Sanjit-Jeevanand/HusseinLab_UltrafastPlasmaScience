@@ -207,7 +207,6 @@ class StellerNet0TriggerThread(threading.Thread):
         StellerNet_functions.external_trigger(spectrometer0, True)
         data_stellar0 = StellerNet_functions.getSpectrum(spectrometer0, wav0, inttime, scansavg, smooth)
 
-
 class StellerNet1TriggerThread(threading.Thread):
     def __init__(self, inttime):
         super(StellerNet1TriggerThread,self).__init__()
@@ -216,7 +215,6 @@ class StellerNet1TriggerThread(threading.Thread):
         logging.warning('displaying spectrum')
         StellerNet_functions.external_trigger(spectrometer1,True)
         data_stellar1 = StellerNet_functions.getSpectrum(spectrometer1, wav1, inttime, scansavg, smooth)
-
 
 class StellerNet2TriggerThread(threading.Thread):
     def __init__(self, inttime):
@@ -1190,7 +1188,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             rep_rate = 0
         
         # self.rast_timer = QtCore.QTimer(self, interval = rep_rate, timeout = self.raster)
-        self.rast_timer = QtCore.QTimer(self, interval = rep_rate, timeout = self.MySpectrometers)
+        self.rast_timer = QtCore.QTimer(self, interval=rep_rate, timeout=self.MySpectrometers)
         self.rast_timer.start()
             
     def raster(self):

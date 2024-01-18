@@ -1,0 +1,1462 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1126</width>
+    <height>832</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>1111</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>40</pointsize>
+     </font>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="text">
+     <string>Viron LIBS UI</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>V0.0.1</string>
+    </property>
+   </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>60</y>
+      <width>1121</width>
+      <height>471</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="delay_generator_tab">
+     <attribute name="title">
+      <string>Delay Generator</string>
+     </attribute>
+     <widget class="QWidget" name="verticalLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>291</width>
+        <height>271</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="delay_layout">
+       <item>
+        <widget class="QLabel" name="channel_delay_label">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Channel Delays</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="channel_delay_line_layout_A">
+         <item>
+          <widget class="QLabel" name="channel_name">
+           <property name="text">
+            <string>A</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="Channel_trig_select_box_A">
+           <property name="currentText">
+            <string>T0</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>T0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>A</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>B</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>C</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>E</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>F</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>G</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>H</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="channel_delay_plus">
+           <property name="text">
+            <string>+</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_A">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="channel_delay_time_unit_A">
+           <item>
+            <property name="text">
+             <string>s</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ms</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>us</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ns</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ps</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="channel_delay_line_layout_B">
+         <item>
+          <widget class="QLabel" name="channel_name_2">
+           <property name="text">
+            <string>B</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="Channel_trig_select_box_B">
+           <property name="currentText">
+            <string>T0</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>T0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>A</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>B</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>C</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>E</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>F</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>G</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>H</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="channel_delay_plus_2">
+           <property name="text">
+            <string>+</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_B">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="channel_delay_time_unit_B">
+           <item>
+            <property name="text">
+             <string>s</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ms</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>us</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ns</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ps</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="channel_delay_line_layout_C">
+         <item>
+          <widget class="QLabel" name="channel_name_3">
+           <property name="text">
+            <string>C</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="Channel_trig_select_box_C">
+           <property name="currentText">
+            <string>T0</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>T0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>A</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>B</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>C</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>E</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>F</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>G</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>H</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="channel_delay_plus_3">
+           <property name="text">
+            <string>+</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_C">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="channel_delay_time_unit_C">
+           <item>
+            <property name="text">
+             <string>s</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ms</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>us</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ns</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ps</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="channel_delay_line_layout_D">
+         <item>
+          <widget class="QLabel" name="channel_name_4">
+           <property name="text">
+            <string>D</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="Channel_trig_select_box_D">
+           <property name="currentText">
+            <string>T0</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>T0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>A</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>B</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>C</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>E</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>F</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>G</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>H</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="channel_delay_plus_4">
+           <property name="text">
+            <string>+</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_D">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="channel_delay_time_unit_D">
+           <item>
+            <property name="text">
+             <string>s</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ms</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>us</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ns</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ps</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="channel_delay_line_layout_E">
+         <item>
+          <widget class="QLabel" name="channel_name_5">
+           <property name="text">
+            <string>E</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="Channel_trig_select_box_E">
+           <property name="currentText">
+            <string>T0</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>T0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>A</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>B</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>C</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>E</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>F</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>G</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>H</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="channel_delay_plus_5">
+           <property name="text">
+            <string>+</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_E">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="channel_delay_time_unit_E">
+           <item>
+            <property name="text">
+             <string>s</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ms</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>us</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ns</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ps</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="channel_delay_line_layout_F">
+         <item>
+          <widget class="QLabel" name="channel_name_6">
+           <property name="text">
+            <string>F</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="Channel_trig_select_box_F">
+           <property name="currentText">
+            <string>T0</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>T0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>A</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>B</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>C</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>E</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>F</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>G</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>H</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="channel_delay_plus_6">
+           <property name="text">
+            <string>+</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_F">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="channel_delay_time_unit_F">
+           <item>
+            <property name="text">
+             <string>s</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ms</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>us</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ns</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ps</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="channel_delay_line_layout_G">
+         <item>
+          <widget class="QLabel" name="channel_name_7">
+           <property name="text">
+            <string>G</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="Channel_trig_select_box_G">
+           <property name="currentText">
+            <string>T0</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>T0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>A</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>B</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>C</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>E</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>F</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>G</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>H</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="channel_delay_plus_7">
+           <property name="text">
+            <string>+</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_G">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="channel_delay_time_unit_G">
+           <item>
+            <property name="text">
+             <string>s</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ms</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>us</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ns</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ps</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="channel_delay_line_layout_H">
+         <item>
+          <widget class="QLabel" name="channel_name_8">
+           <property name="text">
+            <string>H</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="Channel_trig_select_box_H">
+           <property name="currentText">
+            <string>T0</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>T0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>A</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>B</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>C</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>D</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>E</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>F</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>G</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>H</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="channel_delay_plus_8">
+           <property name="text">
+            <string>+</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_H">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="channel_delay_time_unit_H">
+           <item>
+            <property name="text">
+             <string>s</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ms</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>us</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ns</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ps</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="set_delay_button">
+         <property name="text">
+          <string>Set Delays</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="verticalLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>0</y>
+        <width>230</width>
+        <height>177</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="Channel_voltage_layout">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Channel Voltage</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="offset_label">
+           <property name="text">
+            <string>Offset (V)</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="amplitude_label">
+           <property name="text">
+            <string>Amplitude (V)</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="Channel_voltage_AB">
+         <property name="spacing">
+          <number>50</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="channel_name_9">
+           <property name="text">
+            <string>AB:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_9">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_10">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="Channel_voltage_AB_2">
+         <property name="spacing">
+          <number>50</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="channel_name_10">
+           <property name="text">
+            <string>CD:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_11">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_12">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="Channel_voltage_AB_3">
+         <property name="spacing">
+          <number>50</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="channel_name_11">
+           <property name="text">
+            <string>EF:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_13">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_14">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="Channel_voltage_AB_5">
+         <property name="spacing">
+          <number>50</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="channel_name_13">
+           <property name="text">
+            <string>GH:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_17">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="channel_delay_entry_18">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="set_voltage_button">
+         <property name="text">
+          <string>Set Voltages</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="gridLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>180</y>
+        <width>561</width>
+        <height>91</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="2" column="2">
+        <widget class="QPushButton" name="Display_delay_D_button">
+         <property name="text">
+          <string>D</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="Display_delay_T1_button">
+         <property name="text">
+          <string>T1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QPushButton" name="Display_delay_E_button">
+         <property name="text">
+          <string>E</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="Display_delay_A_button">
+         <property name="text">
+          <string>A</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="Display_delay_B_botton">
+         <property name="text">
+          <string>B</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QPushButton" name="Display_delay_F_button">
+         <property name="text">
+          <string>F</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QPushButton" name="Display_delay_C_button">
+         <property name="text">
+          <string>C</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="Display_delay_T0_button">
+         <property name="text">
+          <string>T0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4">
+        <widget class="QPushButton" name="Display_delay_G_button">
+         <property name="text">
+          <string>G</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="4">
+        <widget class="QPushButton" name="Display_delay_F_button_2">
+         <property name="text">
+          <string>H</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="5">
+        <widget class="QLabel" name="Display_delay_label">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Display Delay on DG645</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_14">
+      <property name="geometry">
+       <rect>
+        <x>540</x>
+        <y>150</y>
+        <width>440</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="Trigger_mode_layout">
+       <item>
+        <widget class="QLabel" name="Trigger_mode_Label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Trigger Mode:</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::AutoText</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="Trigger_mode_select">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <item>
+          <property name="text">
+           <string>Internal</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>External Rising Edge</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>External Falling Edge</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Single Shot External Rising Edge</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Single Shot External Falling Edge</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Single Shot</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Line</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Spectrometer_tab">
+     <attribute name="title">
+      <string>Spectrometer</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="spectra_plots_tab">
+     <attribute name="title">
+      <string>Spectra</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="XPS_tab">
+     <attribute name="title">
+      <string>XPS Stage</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="Oscilliscope_tab">
+     <attribute name="title">
+      <string>Oscilloscope</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="tab_8">
+     <attribute name="title">
+      <string>Page</string>
+     </attribute>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1126</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuViron_UI">
+    <property name="title">
+     <string>File</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionThere_is_no_help"/>
+   </widget>
+   <addaction name="menuViron_UI"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_New">
+   <property name="text">
+    <string>&amp; New</string>
+   </property>
+  </action>
+  <action name="actionThere_is_no_help">
+   <property name="text">
+    <string>There is no help</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
