@@ -2,7 +2,7 @@ import instruments as ik
 class DG645:
     def __init__(self, comstring):
         try:
-            self.unit = ik.srs.SRSDG645.open_from_uri(comstring)
+            self.unit = ik.srs.SRSDG645.open_serial(comstring, 9600)
         except:
             self.unit = None
             # raise IOError('Unable to connect to DG645 - Check your com port and ensure it was closed properly before'
@@ -36,12 +36,10 @@ class DG645:
         rtn = rtn.split(',')
         return rtn
               
-    def display_delay(self, target, link, unit, delay):
+    def display_delay(self, target):
         # fix these targets 
-        string = 'DLAY '
-        string += str(self.optlist.index(target.lower())) + ','
-        string += str(self.optlist.index(link.lower())) + ','
-        string += str(delay) + str(self.unitdict[unit])
+        string = 'DISP '
+        string += "11,"+str(self.optlist.index(target.lower()))
         print(string)
         self.sendCommand(string)
 
