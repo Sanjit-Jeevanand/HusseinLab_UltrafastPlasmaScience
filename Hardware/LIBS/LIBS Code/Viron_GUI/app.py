@@ -64,7 +64,7 @@ class Window(QMainWindow, Ui_MainWindow):
             # update the input boxes
             self.channel_trig_list[i].setCurrentText(rtn[0].upper())
             self.channel_delay_entry_list[i].setText(rtn[1])
-            # self.channel_delay_time_unit_list[i].setCurrentText(rtn[2])
+            self.channel_delay_time_unit_list[i].setCurrentText(rtn[2])
             
     def _update_clock(self):
         current_date_time = QDate.currentDate().toString() + ' ' + QTime.currentTime().toString()

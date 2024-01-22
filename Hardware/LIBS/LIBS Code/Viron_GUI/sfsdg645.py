@@ -34,7 +34,18 @@ class DG645:
     def get_delay(self, target):
         rtn = self.query('DLAY?' + str(target))
         rtn = rtn.split(',')
-        return rtn
+        value = float(rtn[1])
+        
+        magnitude = 0
+        for unit, exponent in self.unit_dict.items():
+            if float(exponent) <= abs(value) < 1000:
+                magnitude = exponent
+                break
+
+        # Convert the value to the appropriate unit
+        scaled_value = value / 10**float(magnitude)
+        
+        return [self.optlist[int(rtn[0])], str(scaled_value), str(unit)]
               
     def display_delay(self, target):
         # fix these targets 
@@ -49,10 +60,6 @@ class DG645:
         
         
     def setDelay(self, target, link, delay, unit):
-        # target = self.chosenDelayTarget.get()
-        # link = self.chosenDelayTargetLink.get()
-        # unit = self.chosenDelayUnit.get()
-        # delay = self.delayEntry.get()
         try:
             float(delay)
         except:
