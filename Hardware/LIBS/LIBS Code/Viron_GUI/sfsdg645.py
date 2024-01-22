@@ -11,7 +11,7 @@ class DG645:
             print('Connection was successful.')
             print(self.unit.query('*IDN?'))
 
-        self.optlist = ['0', 't0', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+        self.optlist = ['t0', 't1', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
         self.unitdict = {
             's'     :   'e0',
             'ms'    :   'e-3',
@@ -41,7 +41,7 @@ class DG645:
         string = 'DISP '
         string += "11,"+str(self.optlist.index(target.lower()))
         print(string)
-        self.sendCommand(string)
+        self.sendcmd(string)
 
     def close(self):
         self.unit.sendcmd('IFRS 0')
