@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QApplication, QDialog, QMainWindow, QMessageBox
 )
 from PyQt5.uic import loadUi
-
+import qdarktheme
 from gui import Ui_MainWindow
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -36,6 +36,7 @@ class Window(QMainWindow, Ui_MainWindow):
     
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    qdarktheme.setup_theme()
     win = Window()
     win.show()
     sys.exit(app.exec())
