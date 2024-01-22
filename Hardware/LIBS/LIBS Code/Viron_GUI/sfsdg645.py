@@ -36,14 +36,24 @@ class DG645:
         rtn = rtn.split(',')
         value = float(rtn[1])
         
+       # Define the modified unit dictionary
+        mod_unit_dict = {
+            's': 10**0,
+            'ms': 10**-3,
+            'us': 10**-6,
+            'ns': 10**-9,
+            'ps': 10**-12
+        }
+
+        # Determine the appropriate unit based on the magnitude of the value
         magnitude = 0
-        for unit, exponent in self.unit_dict.items():
+        for unit, exponent in mod_unit_dict.items():
             if float(exponent) <= abs(value) < 1000:
                 magnitude = exponent
                 break
 
         # Convert the value to the appropriate unit
-        scaled_value = value / 10**float(magnitude)
+        scaled_value = value / magnitude
         
         return [self.optlist[int(rtn[0])], str(scaled_value), str(unit)]
               
