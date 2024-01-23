@@ -61,7 +61,7 @@ class Window(QMainWindow, Ui_MainWindow):
         # set all delays from pertinent input boxes
         for i, x in enumerate(self.channel_trig_list):
             self.dg645.setDelay(self.channel_trig_list[i].currentText(), self.channel_trig_list[0].currentText(), self.channel_delay_entry_list[i].text(), self.channel_delay_time_unit_list[i].currentText())
-            
+
     def _dg645_get_all_delays(self):
         for i in range(10):
             rtn = self.dg645.get_delay(i)
