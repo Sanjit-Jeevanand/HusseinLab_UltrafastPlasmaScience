@@ -7,7 +7,7 @@ class scope:
         self.scope = self.rm.open_resource('USB0::0x0699::0x03C7::C020817::INSTR')
         self.yscale = 1
         self.xincr = 1
-        
+    
     def set_params(self, data_source, trig_source, v_div, t_div, rec_length):
         # Set up acquisition parameters
         self.set_data_source(data_source)
@@ -73,3 +73,6 @@ class scope:
     def set_rec_len(self, len):
         self.scope.write('DAT:STAR 1')
         self.scope.write('DAT:STOP '+ len)
+        
+    # need to do get functions
+        
