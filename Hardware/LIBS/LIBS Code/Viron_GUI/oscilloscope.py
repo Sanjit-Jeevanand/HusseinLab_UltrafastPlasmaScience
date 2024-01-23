@@ -13,9 +13,9 @@ class scope:
         self.set_data_source(data_source)
         self.scope.write('DATa:ENCdg RIBinary')   # Set binary data encoding
         self.scope.write('WFMPre:XINcr?')   # Query the x-axis increment
-        self.xincr = float(scope.read())   # Convert the string response to a float  
+        self.xincr = float(self.scope.read())   # Convert the string response to a float  
         self.scope.write('WFMPre:YMUlt?')   # Query the y-axis scale
-        self.yscale = float(scope.read())   # Convert the string response to a float
+        self.yscale = float(self.scope.read())   # Convert the string response to a float
         self.set_trigger_source(trig_source)
         self.scope.write('TRIGger:EDGE:SLOPe POSitive')   # Set the trigger slope to positive
         self.set_rec_len(rec_length)
@@ -27,12 +27,12 @@ class scope:
         # be returned for further async processing in a thread or something.
         
         # Arm the scope and wait for trigger
-        scope.write('ACQuire:STOPAfter SEQuence')   # Stop acquisition after one sequence
-        scope.write('ACQuire:STATE ON')   # Start acquisition
-        scope.query('*OPC?')   # Wait for acquisition to complete
+        self.scope.write('ACQuire:STOPAfter SEQuence')   # Stop acquisition after one sequence
+        self.scope.write('ACQuire:STATE ON')   # Start acquisition
+        self.scope.query('*OPC?')   # Wait for acquisition to complete
         # Read the acquired data
-        scope.write('CURVE?')   # Query the waveform data
-        data = scope.read_raw()   # Read the raw binary data
+        self.scope.write('CURVE?')   # Query the waveform data
+        data = self.scope.read_raw()   # Read the raw binary data
         return data
         
     def handle_data(self, data):
