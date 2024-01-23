@@ -93,7 +93,7 @@ class Window(QMainWindow, Ui_MainWindow):
     
     def _dg645_handle_trigger_select(self):
         src = self.Trigger_mode_select.currentText()
-        # self.dg645.set_trigger_mode(src)
+        self.dg645.set_trigger_mode(src)
         print(src)
         
     

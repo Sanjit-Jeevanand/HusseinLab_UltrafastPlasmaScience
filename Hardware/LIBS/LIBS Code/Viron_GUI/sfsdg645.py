@@ -12,6 +12,7 @@ class DG645:
             print(self.unit.query('*IDN?'))
 
         self.optlist = ['t0', 't1', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+        
         self.unitdict = {
             's'     :   'e0',
             'ms'    :   'e-3',
@@ -19,6 +20,17 @@ class DG645:
             'ns'    :   'e-9',
             'ps'    :   'e-12'
         }
+        
+        self.triggersourcedict = {
+            'internal'  :   '0',
+            'external rising edge'  :   '1',
+            'external falling edge' :   '2',
+            'single shot external rising edge' :   '3',
+            'single shot external falling edge' :   '4',
+            'single shot'   :   '5',
+            'line'  :  '6',
+        }
+        
     def sendcmd(self, command):
         self.unit.sendcmd(command)
 
@@ -46,7 +58,7 @@ class DG645:
         }
 
         # Determine the appropriate unit based on the magnitude of the value
-        magnitude = 0
+        magnitude = 1
         for unit, exponent in mod_unit_dict.items():
             if float(exponent) <= abs(value) < 1000:
                 magnitude = exponent
@@ -96,4 +108,10 @@ class DG645:
     def set_offset(self, target, offset):
         self.sendcmd("LOFF "+str(target)+","+str(offset))
         
+    def get_trigger_source(self):
+        rtn = self.query("TSRC?")
+        return rtn
+        
+    def set_trigger_source(self, source):
+        self.sendcmd("TSRC "+str(self.triggersourcedict[source]))
         
