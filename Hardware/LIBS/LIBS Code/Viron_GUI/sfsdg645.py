@@ -82,3 +82,18 @@ class DG645:
         string += str(delay) + str(self.unitdict[unit])
         self.sendCommand(string)
         
+    def get_amplitude(self, target):
+        rtn = self.query("LAMP?"+str(target))
+        return rtn
+    
+    def set_amplitude(self, target, amplitude):
+        self.sendcmd("LAMP "+str(target)+","+str(amplitude))
+        
+    def get_offset(self, target):
+        rtn = self.query("LOFF?"+str(target))
+        return rtn
+    
+    def set_offset(self, target, offset):
+        self.sendcmd("LOFF "+str(target)+","+str(offset))
+        
+        

@@ -24,6 +24,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.channel_trig_list = [self.Channel_trig_select_box_T0, self.Channel_trig_select_box_T1, self.Channel_trig_select_box_A, self.Channel_trig_select_box_B, self.Channel_trig_select_box_C, self.Channel_trig_select_box_D, self.Channel_trig_select_box_E, self.Channel_trig_select_box_F, self.Channel_trig_select_box_G, self.Channel_trig_select_box_H]
         self.channel_delay_entry_list = [self.channel_delay_entry_T0, self.channel_delay_entry_T1, self.channel_delay_entry_A, self.channel_delay_entry_B, self.channel_delay_entry_C, self.channel_delay_entry_D, self.channel_delay_entry_E, self.channel_delay_entry_F, self.channel_delay_entry_G, self.channel_delay_entry_H]
         self.channel_delay_time_unit_list = [self.channel_delay_time_unit_T0, self.channel_delay_time_unit_T1, self.channel_delay_time_unit_A, self.channel_delay_time_unit_B, self.channel_delay_time_unit_C, self.channel_delay_time_unit_D, self.channel_delay_time_unit_E, self.channel_delay_time_unit_F, self.channel_delay_time_unit_G, self.channel_delay_time_unit_H]
+        self.amplitude_entry_list = [self.ab_amplitude_entry, self.cd_amplitude_entry, self.ef_amplitude_entry, self.gh_amplitude_entry]
+        self.offset_entry_list = [self.ab_offset_entry, self.cd_offset_entry, self.ef_offset_entry, self.gh_offset_entry]
         
         self.Display_delay_T0_button.clicked.connect(lambda: self._dg645_display_delay('t0'))
         self.Display_delay_T1_button.clicked.connect(lambda: self._dg645_display_delay('t1'))
@@ -36,7 +38,10 @@ class Window(QMainWindow, Ui_MainWindow):
         self.Display_delay_G_button.clicked.connect(lambda: self._dg645_display_delay('g'))
         self.Display_delay_H_button.clicked.connect(lambda: self._dg645_display_delay('h'))
         self.set_delay_button.clicked.connect(self._dg645_set_delays)
-        self._init_dg645()
+        self.Trigger_mode_select.currentIndexChanged.connect(self._dg645_handle_trigger_select)
+        self.get_all_values_button.clicked.connect(self._dg645_get_all_values)
+        
+        # self._init_dg645()
 
     def _init_dg645(self):
         try:
@@ -56,9 +61,6 @@ class Window(QMainWindow, Ui_MainWindow):
             self.dg645.setDelay(self.channel_trig_list[i].currentText(), self.channel_trig_list[0].currentText(), self.channel_delay_entry_list[i].text(), self.channel_delay_time_unit_list[i].currentText())
             
     def _dg645_get_all_delays(self):
-        # this doesn't actually work rn we need to split the strings and do some wizardry
-        # to get the combobox to display properly. should do that in the classfile
-        
         for i in range(10):
             rtn = self.dg645.get_delay(i)
             # update the input boxes
@@ -66,9 +68,39 @@ class Window(QMainWindow, Ui_MainWindow):
             self.channel_delay_entry_list[i].setText(rtn[1])
             self.channel_delay_time_unit_list[i].setCurrentText(rtn[2])
             
+    def _dg645_get_all_values(self):
+        pass
+    
+    def _dg645_get_amplitude_offset(self):
+        for i in range(4):
+            amp = self.dg645.get_amplitude(i+1)
+            offset = self.dg645.get_offset(i+1)
+            self.amplitude_entry_list[i].setText(amp)
+            self.offset_entry_list[i].setText(offset)
+    
+    def _dg645_set_amplitude_offset(self):
+        for i in range(4):
+            self.dg645.set_amplitude(i+1, self.amplitude_entry_list[i].text())
+            self.dg645.set_offset(i+1, self.offset_entry_list[i].text())
+            
+    def _dg645_get_trigger_source(self):
+        src = self.dg645.get_trigger_source()
+        self.trigger_source_select_box.setCurrentText(src)
+    
+    def _dg645_set_trigger_source(self):
+        src = self.trigger_source_select_box.currentText()
+        self.dg645.set_trigger_source(src)
+    
+    def _dg645_handle_trigger_select(self):
+        src = self.Trigger_mode_select.currentText()
+        # self.dg645.set_trigger_mode(src)
+        print(src)
+        
+    
     def _update_clock(self):
         current_date_time = QDate.currentDate().toString() + ' ' + QTime.currentTime().toString()
         self.clock_label.setText(current_date_time)
+        
         
         
 if __name__ == "__main__":
