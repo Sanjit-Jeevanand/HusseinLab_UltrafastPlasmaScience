@@ -9,6 +9,7 @@ from PyQt5.uic import loadUi
 import qdarktheme
 from gui import Ui_MainWindow
 from PyQt5.QtCore import QDate
+from pyqtgraph import PlotWidget
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -45,6 +46,9 @@ class Window(QMainWindow, Ui_MainWindow):
         
         # ------------------------------------------------------------------------------------------
         # oscilloscope stuff:
+        self.scope_datasource_select.currentIndexChanged.connect(lambda: self._scope_set_data_source(self.scope_datasource_select.currentText()))
+        self.scope_triggersource_select.currentIndexChanged.connect(lambda: self._scope_set_trigger_source(self.scope_triggersource_select.currentText()))
+        self.set_scope_params_button.clicked.connect(self._scope_set_all_params)
         '''
         # self.data_source_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
         self.data_source_line.textChanged.connect(lambda: self.ocilloscope_inp('data_source'))
@@ -60,7 +64,7 @@ class Window(QMainWindow, Ui_MainWindow):
         # ----------------------------------------------------------------------------------------------
         # DIAGNOSTIC INITALIZATION
         # ----------------------------------------------------------------------------------------------
-        self._init_dg645()
+        # self._init_dg645()
         self._init_scope()
         
         # ----------------------------------------------------------------------------------------------
@@ -93,7 +97,6 @@ class Window(QMainWindow, Ui_MainWindow):
     def _dg645_set_delays(self):
         # set all delays from pertinent input boxes
         for i, x in enumerate(self.channel_trig_list):
-            # self.dg645.setDelay(self.channel_trig_list[i].currentText(), self.channel_trig_list[0].currentText(), self.channel_delay_entry_list[i].text(), self.channel_delay_time_unit_list[i].currentText())
             self.dg645.setDelay(i, self.channel_trig_list[i].currentText(), self.channel_delay_entry_list[i].text(), self.channel_delay_time_unit_list[i].currentText())
 
     def _dg645_get_all_delays(self):
@@ -154,13 +157,34 @@ class Window(QMainWindow, Ui_MainWindow):
         else:
             self._scope_get_all_values()
 
+    def _scope_set_data_source(self, source):
+        self.scope.set_data_source(source)
+        
+    def _scope_set_trigger_source(self, source):
+        self.scope.set_trigger_source(source)
+        
+    def _scope_set_all_params(self):
+        source = self.scope_datasource_select.currentText()
+        trig = self.scope_triggersource_select.currentText()
+        vdiv = self.scope_voltsperdiv_entry.text()
+        tdiv = self.scope_timeperdiv_entry.text()
+        reclen = self.scope_record_length_entry.text()
+        if self._is_float(vdiv) and self._is_float(tdiv) and self._is_float(reclen):
+            self.scope.set_params(source, trig, vdiv, tdiv, reclen)
+        else:
+            QMessageBox.critical(self, 'Error', 'Error: Invalid scope parameters')
+
     '''_______________________________________________________________________________________________________'''
 
     def _update_clock(self):
         current_date_time = QDate.currentDate().toString() + ' ' + QTime.currentTime().toString()
         self.clock_label.setText(current_date_time)
      
-        
+    def _is_float(self, string):
+        if string.replace(".", "").isnumeric():
+            return True
+        else:
+            return False
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)

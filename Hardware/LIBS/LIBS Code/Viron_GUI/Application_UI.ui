@@ -2456,9 +2456,9 @@
      <widget class="QLabel" name="scope_trigger_source_label">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>10</x>
         <y>70</y>
-        <width>111</width>
+        <width>151</width>
         <height>41</height>
        </rect>
       </property>
@@ -2468,7 +2468,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Trigger Source:</string>
+       <string>Trigger Source (CH):</string>
       </property>
      </widget>
      <widget class="QLabel" name="scope_record_length_label">
@@ -2492,9 +2492,9 @@
      <widget class="QLabel" name="scope_data_source_label">
       <property name="geometry">
        <rect>
-        <x>70</x>
+        <x>30</x>
         <y>40</y>
-        <width>101</width>
+        <width>141</width>
         <height>41</height>
        </rect>
       </property>
@@ -2504,7 +2504,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Data Source:</string>
+       <string>Data Source (CH):</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="scope_timeperdiv_entry">
@@ -2531,22 +2531,22 @@
       </property>
       <item>
        <property name="text">
-        <string>Ch1</string>
+        <string>1</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Ch2</string>
+        <string>2</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Ch3</string>
+        <string>3</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Ch4</string>
+        <string>4</string>
        </property>
       </item>
      </widget>
@@ -2561,24 +2561,47 @@
       </property>
       <item>
        <property name="text">
-        <string>Ch1</string>
+        <string>1</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Ch2</string>
+        <string>2</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Ch3</string>
+        <string>3</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Ch4</string>
+        <string>4</string>
        </property>
       </item>
+     </widget>
+     <widget class="PlotWidget" name="scope_graph" native="true">
+      <property name="geometry">
+       <rect>
+        <x>290</x>
+        <y>0</y>
+        <width>831</width>
+        <height>451</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="set_scope_params_button">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>230</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Set Parameters</string>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="experimental_param_tab">
@@ -2776,6 +2799,14 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QWidget</extends>
+   <header>pyqtgraph</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
