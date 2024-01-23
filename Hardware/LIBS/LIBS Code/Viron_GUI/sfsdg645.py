@@ -92,7 +92,7 @@ class DG645:
         string += str(self.optlist.index(target.lower())) + ','
         string += str(self.optlist.index(link.lower())) + ','
         string += str(delay) + str(self.unitdict[unit])
-        self.sendCommand(string)
+        self.sendcmd(string)
         
     def get_amplitude(self, target):
         rtn = self.query("LAMP?"+str(target))
@@ -113,5 +113,5 @@ class DG645:
         return rtn
         
     def set_trigger_source(self, source):
-        self.sendcmd("TSRC "+str(self.triggersourcedict[source]))
+        self.sendcmd("TSRC "+str(self.triggersourcedict[source.lower()]))
         

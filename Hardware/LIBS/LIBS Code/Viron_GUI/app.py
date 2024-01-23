@@ -41,7 +41,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.Trigger_mode_select.currentIndexChanged.connect(self._dg645_handle_trigger_select)
         self.get_all_values_button.clicked.connect(self._dg645_get_all_values)
         
-        # self._init_dg645()
+        self._init_dg645()
 
     def _init_dg645(self):
         try:
@@ -50,6 +50,8 @@ class Window(QMainWindow, Ui_MainWindow):
             QMessageBox.critical(self, 'Error', 'Unable to connect to DG645 - Check your com port and ensure it was closed properly before connecting again')
         else:
             self._dg645_get_all_delays()
+            self._dg645_get_amplitude_offset()
+            self._dg645_get_trigger_source()
             
     def _dg645_display_delay(self, target):
         # display them delays
@@ -85,15 +87,15 @@ class Window(QMainWindow, Ui_MainWindow):
             
     def _dg645_get_trigger_source(self):
         src = self.dg645.get_trigger_source()
-        self.trigger_source_select_box.setCurrentText(src)
+        self.Trigger_mode_select.setCurrentText(src)
     
     def _dg645_set_trigger_source(self):
-        src = self.trigger_source_select_box.currentText()
+        src = self.Trigger_mode_select.currentText()
         self.dg645.set_trigger_source(src)
     
     def _dg645_handle_trigger_select(self):
         src = self.Trigger_mode_select.currentText()
-        self.dg645.set_trigger_mode(src)
+        self.dg645.set_trigger_source(src)
         print(src)
         
     
