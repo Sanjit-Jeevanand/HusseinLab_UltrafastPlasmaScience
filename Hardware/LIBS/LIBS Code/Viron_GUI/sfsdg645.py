@@ -89,10 +89,12 @@ class DG645:
             return
         print(target, link, unit, delay)
         string = 'DLAY '
-        string += str(self.optlist.index(target.lower())) + ','
+        # string += str(self.optlist.index(target.lower())) + ','
+        string += str(target) + ","
         string += str(self.optlist.index(link.lower())) + ','
         string += str(delay) + str(self.unitdict[unit])
         self.sendcmd(string)
+
         
     def get_amplitude(self, target):
         rtn = self.query("LAMP?"+str(target))
