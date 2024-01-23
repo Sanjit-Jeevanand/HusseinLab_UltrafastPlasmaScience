@@ -1,5 +1,6 @@
 import sys
 from sfsdg645 import DG645
+from oscilloscope import scope
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QMainWindow, QMessageBox
 )
@@ -18,8 +19,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.clock_timer = QTimer(self, interval=1000, timeout=self._update_clock)
         self.clock_timer.start()
         
+        # ------------------------------------------------------------------------------------------
         # dg645 stuff: 
-        
         # init lists for easier access
         self.channel_trig_list = [self.Channel_trig_select_box_T0, self.Channel_trig_select_box_T1, self.Channel_trig_select_box_A, self.Channel_trig_select_box_B, self.Channel_trig_select_box_C, self.Channel_trig_select_box_D, self.Channel_trig_select_box_E, self.Channel_trig_select_box_F, self.Channel_trig_select_box_G, self.Channel_trig_select_box_H]
         self.channel_delay_entry_list = [self.channel_delay_entry_T0, self.channel_delay_entry_T1, self.channel_delay_entry_A, self.channel_delay_entry_B, self.channel_delay_entry_C, self.channel_delay_entry_D, self.channel_delay_entry_E, self.channel_delay_entry_F, self.channel_delay_entry_G, self.channel_delay_entry_H]
@@ -40,9 +41,41 @@ class Window(QMainWindow, Ui_MainWindow):
         self.set_delay_button.clicked.connect(self._dg645_set_delays)
         self.Trigger_mode_select.currentIndexChanged.connect(self._dg645_handle_trigger_select)
         self.get_all_values_button.clicked.connect(self._dg645_get_all_values)
+        # ----------------------------------------------------------------------------------------------
         
+        # ------------------------------------------------------------------------------------------
+        # oscilloscope stuff:
+        '''
+        # self.data_source_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+        self.data_source_line.textChanged.connect(lambda: self.ocilloscope_inp('data_source'))
+        # self.trig_source_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+        self.trig_source_line.textChanged.connect(lambda: self.ocilloscope_inp('trig_source'))
+        self.rec_length_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+        self.rec_length_line.textChanged.connect(lambda: self.ocilloscope_inp('rec_length'))
+        self.v_div_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+        self.v_div_line.textChanged.connect(lambda: self.ocilloscope_inp('v_div'))
+        self.t_div_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+        self.t_div_line.textChanged.connect(lambda: self.ocilloscope_inp('t_div'))
+        '''
+        # ----------------------------------------------------------------------------------------------
+        # DIAGNOSTIC INITALIZATION
+        # ----------------------------------------------------------------------------------------------
         self._init_dg645()
-
+        self._init_scope()
+        
+        # ----------------------------------------------------------------------------------------------
+    
+    
+    
+    '''
+        _______   _______    __    _  _     _____  
+        |       \ /  _____|  / /   | || |   | ____| 
+        |  .--.  |  |  __   / /_   | || |_  | |__   
+        |  |  |  |  | |_ | | '_ \  |__   _| |___ \  
+        |  '--'  |  |__| | | (_) |    | |    ___) | 
+        |_______/ \______|  \___/     |_|   |____/  
+    _________________________________________________________________________________________________                                       
+    '''    
     def _init_dg645(self):
         try:
             self.dg645 = DG645("COM4")
@@ -100,12 +133,33 @@ class Window(QMainWindow, Ui_MainWindow):
         src = self.Trigger_mode_select.currentText()
         self.dg645.set_trigger_source(src)
         print(src)
-        
+    '''_______________________________________________________________________________________________________'''   
     
+    
+    '''
+            _______.  ______   ______   .______    _______ 
+            /       | /      | /  __  \  |   _  \  |   ____|
+           |   (----`|  ,----'|  |  |  | |  |_)  | |  |__   
+            \   \    |  |     |  |  |  | |   ___/  |   __|  
+        .----)   |   |  `----.|  `--'  | |  |      |  |____ 
+        |_______/     \______| \______/  | _|      |_______|
+        _________________________________________________________________________________________________                                                    
+    '''
+    # scope methods go here
+    def _init_scope(self):
+        try:
+            self.scope = scope()
+        except:
+            QMessageBox.critical(self, 'Error', 'Unable to connect to oscilloscope - Check your com port and ensure it was closed properly before connecting again')
+        else:
+            self._scope_get_all_values()
+
+    '''_______________________________________________________________________________________________________'''
+
     def _update_clock(self):
         current_date_time = QDate.currentDate().toString() + ' ' + QTime.currentTime().toString()
         self.clock_label.setText(current_date_time)
-        
+     
         
         
 if __name__ == "__main__":

@@ -70,7 +70,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="delay_generator_tab">
      <attribute name="title">
@@ -2391,7 +2391,7 @@
      <attribute name="title">
       <string>Oscilloscope</string>
      </attribute>
-     <widget class="QLineEdit" name="v_div_line">
+     <widget class="QLineEdit" name="scope_voltsperdiv_entry">
       <property name="geometry">
        <rect>
         <x>170</x>
@@ -2404,7 +2404,7 @@
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="label_64">
+     <widget class="QLabel" name="scope_voltsperdiv_label">
       <property name="geometry">
        <rect>
         <x>70</x>
@@ -2422,7 +2422,7 @@
        <string>Volt/Div (V):</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_32">
+     <widget class="QLabel" name="scope_timeperdiv_label">
       <property name="geometry">
        <rect>
         <x>60</x>
@@ -2440,7 +2440,7 @@
        <string>Time/Div (s):</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="rec_length_line">
+     <widget class="QLineEdit" name="scope_record_length_entry">
       <property name="geometry">
        <rect>
         <x>170</x>
@@ -2453,7 +2453,7 @@
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="label_65">
+     <widget class="QLabel" name="scope_trigger_source_label">
       <property name="geometry">
        <rect>
         <x>50</x>
@@ -2471,7 +2471,7 @@
        <string>Trigger Source:</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_46">
+     <widget class="QLabel" name="scope_record_length_label">
       <property name="geometry">
        <rect>
         <x>50</x>
@@ -2489,7 +2489,7 @@
        <string>Record Length:</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_66">
+     <widget class="QLabel" name="scope_data_source_label">
       <property name="geometry">
        <rect>
         <x>70</x>
@@ -2507,7 +2507,7 @@
        <string>Data Source:</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="t_div_line">
+     <widget class="QLineEdit" name="scope_timeperdiv_entry">
       <property name="geometry">
        <rect>
         <x>170</x>
@@ -2520,7 +2520,7 @@
        <string/>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBox">
+     <widget class="QComboBox" name="scope_datasource_select">
       <property name="geometry">
        <rect>
         <x>170</x>
@@ -2550,7 +2550,7 @@
        </property>
       </item>
      </widget>
-     <widget class="QComboBox" name="comboBox_2">
+     <widget class="QComboBox" name="scope_triggersource_select">
       <property name="geometry">
        <rect>
         <x>170</x>
