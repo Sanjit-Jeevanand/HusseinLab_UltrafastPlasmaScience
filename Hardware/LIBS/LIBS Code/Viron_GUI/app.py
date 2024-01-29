@@ -10,7 +10,8 @@ import qdarktheme
 from gui import Ui_MainWindow
 from PyQt5.QtCore import QDate
 from pyqtgraph import PlotWidget
-
+from telnetGUI import TelnetSessionGUI
+from Viron import VironLaser
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -61,6 +62,18 @@ class Window(QMainWindow, Ui_MainWindow):
         self.t_div_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
         self.t_div_line.textChanged.connect(lambda: self.ocilloscope_inp('t_div'))
         '''
+        
+        # ----------------------------------------------------------------------------------------------
+        # Viron Stuff
+        self.host = "192.168.103.103"
+        self.port = 23
+        self.password = "VR6BE4EE"
+        self.tngui = TelnetSessionGUI()
+        self.laser = VironLaser(self.host, self.port, self.password, telnetgui=self.tngui)
+        self.tngui.set_laser(self.laser)
+        self.connected = False
+        # init statuses
+        self.handle_get_status(status_hex="0x000000000000")
         # ----------------------------------------------------------------------------------------------
         # DIAGNOSTIC INITALIZATION
         # ----------------------------------------------------------------------------------------------
@@ -175,7 +188,188 @@ class Window(QMainWindow, Ui_MainWindow):
             QMessageBox.critical(self, 'Error', 'Error: Invalid scope parameters')
 
     '''_______________________________________________________________________________________________________'''
+    
+    
+    '''_______________________________________________________________________________________________________'''
+    '''
+        __     _____ ____   ___  _   _ 
+        \ \   / /_ _|  _ \ / _ \| \ | |
+         \ \ / / | || |_) | | | |  \| |
+          \ V /  | ||  _ <| |_| | |\  |
+           \_/  |___|_| \_\\___/|_| \_|
+        _________________________________________________________________________________________________'''
+        
+    def handle_get_status(self, status_hex=None):
+        """
+        Handles the action when the "Get Status" button is clicked.
+        Retrieves the laser status hex value and parses it into a status dictionary.
+        Then, it displays the status on the GUI.
 
+        Returns:
+            None
+        """
+        if status_hex is None:
+            if self.connected:
+                status_hex = self.laser.get_status()
+            else:
+                return
+        if status_hex is not None:   
+            status = self._parse_status(status_hex)
+            
+        self.display_status(status)
+        self.display_critical_info(status)
+        if self.connected:
+            self._get_values()
+        
+    def _get_values(self):
+        diode_current = self.laser.send_command('$DCURR ?', response=True)
+        diode_pulse_width = self.laser.send_command('$DPW ?', response=True)
+        qs_delay = self.laser.send_command('$QSDELAY ?', response=True)
+        qs_pre = self.laser.send_command('$QSPRE ?', response=True)
+        reprate = self.laser.send_command('$DFREQ ?', response=True)
+        
+        if diode_current:
+            self.diode_current_layout.set_value(str(diode_current.split()[1]))
+        if diode_pulse_width:
+            self.diode_pulse_width_layout.set_value(str(diode_pulse_width.split()[1]))
+        if qs_delay:
+            self.qs_delay_layout.set_value(str(qs_delay.split()[1]))
+        if qs_pre:
+            self.qswitch_pre_layout.set_value(str(qs_pre).split()[1])
+        if reprate:
+            self.rep_rate_layout.set_value(str(reprate).split()[1])   
+    def _parse_status(self, hex_value):
+        """
+        Parses the status hex value into a dictionary containing the status information.
+        
+        input:
+        - hex_value (str): The status hex value.
+        
+        return:
+        - status (dict): The status dictionary containing key-value pairs.
+        """
+        
+        
+        # Convert hex value to binary string
+        binary_string = bin(int(hex_value, 16))[2:].zfill(48)
+
+        # Extract individual status based on byte and bit positions
+        status = {}
+
+        # Byte 1
+        status['Fire Mode'] = 'Disabled' if binary_string[0] == '0' else 'Fire'
+        status['Standby Mode'] = 'Stop' if binary_string[1] == '0' else 'Standby'
+        status['Diode Trigger Mode'] = 'Internal' if binary_string[2] == '0' else 'External'
+        status['Q-Switch Mode'] = 'Internal' if binary_string[3] == '0' else 'External'
+        status['Divide By Mode'] = 'Normal' if binary_string[4] == '0' else 'Divide By'
+        status['Burst Mode'] = 'Continuous' if binary_string[5] == '0' else 'Burst'
+        status['Q-Switch'] = 'Disabled' if binary_string[6] == '0' else 'Enabled'
+        status['Ready'] = "Ready" if binary_string[7] == '0' else 'Not Ready'
+
+        # Byte 2
+        status['UV Illumination'] = 'Disabled' if binary_string[8] == '0' else 'Enabled'
+        status['Remote Q-Switch'] = 'Normal Q-Switch' if binary_string[9] == '0' else 'Q-Switch off'
+        status['50 Ohm Trigger Termination'] = 'Laser Disabled' if binary_string[10] == '0' else 'Enabled'
+        status['BLE Session Temp'] = 'No Session' if binary_string[11] == '0' else 'Session'
+        status['Diode TEC Running Temp'] = 'Off' if binary_string[12] == '0' else 'Run'
+        status['LAN Session Temp'] = 'No Session' if binary_string[13] == '0' else 'Session'
+        status['NLO Oven 2 Running Temp'] = 'Off' if binary_string[14] == '0' else 'Run'
+        status['NLO Oven 1 Running Temp'] = 'Off' if binary_string[15] == '0' else 'Run'
+
+        # Byte 3
+        status['Remote Interlock Laser'] = 'No' if binary_string[16] == '0' else 'Yes'
+        status['Laser Temperature Range'] = 'OK' if binary_string[17] == '0' else 'Fault'
+        status['Charge Fault'] = 'OK' if binary_string[18] == '0' else 'Fault'
+        status['Diode Current Fault'] = 'OK' if binary_string[19] == '0' else 'Fault'
+        status['Diode Temperature High or Low'] = 'OK' if binary_string[20] == '0' else 'Fault'
+        status['Diode Temperature Control Fault'] = 'OK' if binary_string[21] == '0' else 'Fault'
+        status['System Interlock System/TEC Temp/Sys OK'] = 'OK' if binary_string[22] == '0' else 'Fault'
+        status['System Interlock Laser Node'] = 'OK' if binary_string[23] == '0' else 'Fault'
+
+        # Byte 4
+        status['Reserved for BLE'] = 'No Action' if binary_string[24] == '0' else 'No Action'
+        status['Reserved'] = 'No Action' if binary_string[25] == '0' else 'No Action'
+        status['Operations Config Checksum'] = 'OK' if binary_string[26] == '0' else 'Fault'
+        status['Factory Config Checksum'] = 'Ok' if binary_string[27] == '0' else 'Fault'
+        status['CAN bus fault'] = 'OK' if binary_string[28] == '0' else 'Fault'
+        status['Run time fault'] = 'OK' if binary_string[29] == '0' else 'Fault'
+        status['RAM test fault'] = 'OK' if binary_string[30] == '0' else 'Fault'
+        status['Watchdog Timeout'] = 'OK' if binary_string[31] == '0' else 'Fault'
+
+        # Byte 5
+        status['External Lamp PRF'] = 'OK' if binary_string[32] == '0' else 'PRF High'
+        status['Laser Temperature Warning'] = 'OK' if binary_string[33] == '0' else 'Warning'
+        status['Pre-Lase Detect/Q-Switch inhibited'] = 'OK' if binary_string[34] == '0' else 'Inhibited'
+        status['CAN Bus Illegal ID or data'] = 'No' if binary_string[35] == '0' else 'Yes'
+        status['CAN Bus Overrun'] = 'No' if binary_string[36] == '0' else 'Yes'
+        status['Diode Current Limit'] = 'OK' if binary_string[37] == '0' else 'Warning'
+        status['Reserved for Log Only - Temp Laser'] = 'Temp' if binary_string[38] == '0' else 'Laser'
+        status['Diode/TEC Temp. Warning'] = 'OK' if binary_string[39] == '0' else 'Warning'
+
+        # Byte 6
+        status['NLO Oven 2 out of tolerance'] = 'No' if binary_string[40] == '0' else 'Yes'
+        status['NLO Oven 2 timeout, oven 2 off'] = 'OK' if binary_string[41] == '0' else 'Warning'
+        status['NLO Oven 2 over temp, oven 2 off'] = 'OK' if binary_string[42] == '0' else 'Warning'
+        status['NLO Oven 2 open sensor, oven 2 off'] = 'OK' if binary_string[43] == '0' else 'Warning'
+        status['NLO Oven 1 out of tolerance'] = 'No' if binary_string[44] == '0' else 'Yes'
+        status['NLO Oven 1 timeout, oven 1 off'] = 'OK' if binary_string[45] == '0' else 'Warning'
+        status['NLO Oven 1 over temp, oven 1 off'] = 'OK' if binary_string[46] == '0' else 'Warning'
+        status['NLO Oven 1 open sensor, oven 1 off'] = 'OK' if binary_string[47] == '0' else 'Warning'
+
+        return status
+    
+
+    def display_critical_info(self, status):
+        """
+        Displays the critical status information on the GUI.
+        
+        Input:
+        - status (dict): The status dictionary containing key-value pairs.
+        """
+        status_text = "Modes:\n"
+        status_text += f"  Fire Mode: {status['Fire Mode']}\n"
+        status_text += f"  Standby Mode: {status['Standby Mode']}\n"
+        status_text += f"  Status: {status['Ready']}\n"
+        status_text += f"  Q-Switch: {status['Q-Switch']}\n"
+        status_text += "Interlocks:\n"
+        status_text += f"  Remote interlock: {status['Remote Interlock Laser']}\n"
+        status_text += f"  System Interlock: {status['System Interlock System/TEC Temp/Sys OK']}\n"
+        status_text += f"  Laser Node Interlock: {status['System Interlock Laser Node']}\n"
+        temps = self.laser.get_temps()
+        status_text += "Temperatures:\n"
+        status_text += f"  Laser Temp: {temps['Laser Temp']} C\n"
+        status_text += f"  Diode Temp: {temps['Diode Temp']} C\n"
+        self.critical_status_label.setText(status_text)
+        
+        
+    def display_status(self, status):
+        # Define the headers for each bundle of 8 lines
+        headers = ["Status Byte 1", "Status Byte 2", "Fault Byte 1", "Fault Byte 2", "Warning Byte 1", "Warning Byte 2"]
+
+        # ToDo: Color code status based on fault/warning
+        status_text_1 = ""
+        status_text_2 = ""
+        i = 0
+        j = 0
+        for key, value in status.items():
+            if i % 8 == 0:
+                # Add the header for the current bundle of 8 lines
+                header_index = i // 8
+                if j > 2:
+                    status_text_2 += f"\n{headers[header_index]}:\n"
+                else:
+                    status_text_1 += f"\n{headers[header_index]}:\n"
+                j += 1
+            if j > 3:
+                status_text_2 += f"  {key}: {value}\n"
+            else:
+                status_text_1 += f"  {key}: {value}\n"
+            i += 1
+
+        self.status_label_left.setText(status_text_1)
+        self.status_label_right.setText(status_text_2)
+        
+        
     def _update_clock(self):
         current_date_time = QDate.currentDate().toString() + ' ' + QTime.currentTime().toString()
         self.clock_label.setText(current_date_time)
