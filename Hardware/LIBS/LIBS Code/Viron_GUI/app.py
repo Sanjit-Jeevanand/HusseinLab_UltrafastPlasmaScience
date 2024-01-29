@@ -89,7 +89,12 @@ class Window(QMainWindow, Ui_MainWindow):
         self.viron_autofire_button.clicked.connect(self.toggle_autofire)
         # single shot button
         self.viron_singlefire_button.clicked.connect(self.toggle_singlefire)
-        
+        # set rep rate
+        self.viron_set_reprate_button.clicked.connect(self.handle_set_rep_rate)
+        # set qs delay
+        self.viron_set_qsdelay_button.clicked.connect(self.handle_set_qs_delay)
+        # set qs pre
+        self.viron_qspre_set_button.clicked.connect(self.handle_set_qs_pre)
         # init tngui layout
         self.tngui_box.addWidget(self.tngui)
         # init statuses
@@ -253,11 +258,11 @@ class Window(QMainWindow, Ui_MainWindow):
         if diode_pulse_width:
             self.diode_pulse_width_layout.set_value(str(diode_pulse_width.split()[1]))
         if qs_delay:
-            self.qs_delay_layout.set_value(str(qs_delay.split()[1]))
+            self.viron_qsdelay_entry.set_value(str(qs_delay.split()[1]))
         if qs_pre:
-            self.qswitch_pre_layout.set_value(str(qs_pre).split()[1])
+            self.viron_qspre_entry.set_value(str(qs_pre).split()[1])
         if reprate:
-            self.rep_rate_layout.set_value(str(reprate).split()[1])   
+            self.viron_reprate_entry.set_value(str(reprate).split()[1])   
             
     def _parse_status(self, hex_value):
         """
@@ -512,7 +517,43 @@ class Window(QMainWindow, Ui_MainWindow):
             self.set_alignment_button.setStyleSheet("background-color: lightgrey")
             
         if self.laser.fire_single_shot():
-            print("fired mah lazor")   
+            print("fired mah lazor")  
+            
+            
+    def handle_set_rep_rate(self):
+        """
+        Handles the action when the "Set Rep Rate" button is clicked.
+        Retrieves the repetition rate value from the text entry and sets it on the laser.
+
+        Returns:
+            None
+        """
+        rate = self.viron_reprate_entry.text()
+        if rate.isdigit():
+            self.laser.set_rep_rate(int(rate))
+            
+    def handle_set_qs_delay(self):
+        '''
+        Handles the action when the "Set Q-Switch Delay" button is clicked.
+        '''
+        delay = self.viron_qsdelay_entry.text()
+        if delay.isdigit():
+            if self.laser.set_qs_delay(int(delay)):
+                print('Q-Switch Delay Set to ', delay)
+                return True
+        return False
+    
+    def handle_set_qs_pre(self):
+        '''
+        Handles the action when the "Set Q-Switch pre" button is clicked.
+        '''
+        delay = self.viron_qspre_entry.text()
+        if delay.isdigit():
+            if self.laser.set_qs_pre(int(delay)):
+                print('Q-Switch Pre Set to ', delay)
+                return True
+        return False
+             
     def _update_clock(self):
         current_date_time = QDate.currentDate().toString() + ' ' + QTime.currentTime().toString()
         self.clock_label.setText(current_date_time)
