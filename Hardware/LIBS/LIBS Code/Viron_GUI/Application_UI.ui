@@ -66,11 +66,11 @@
       <x>0</x>
       <y>60</y>
       <width>1121</width>
-      <height>471</height>
+      <height>561</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>6</number>
     </property>
     <widget class="QWidget" name="delay_generator_tab">
      <attribute name="title">
@@ -2742,6 +2742,34 @@
      <attribute name="title">
       <string>Viron Control</string>
      </attribute>
+     <widget class="QTabWidget" name="tabWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1111</width>
+        <height>531</height>
+       </rect>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="laser_control_tab">
+       <attribute name="title">
+        <string>Laser Control</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="status_tab">
+       <attribute name="title">
+        <string>Status</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="telnet_session_tab">
+       <attribute name="title">
+        <string>Telnet Session</string>
+       </attribute>
+      </widget>
+     </widget>
     </widget>
    </widget>
    <widget class="QLabel" name="clock_label">
