@@ -247,16 +247,11 @@ class Window(QMainWindow, Ui_MainWindow):
             self._get_values()
         
     def _get_values(self):
-        diode_current = self.laser.send_command('$DCURR ?', response=True)
-        diode_pulse_width = self.laser.send_command('$DPW ?', response=True)
         qs_delay = self.laser.send_command('$QSDELAY ?', response=True)
         qs_pre = self.laser.send_command('$QSPRE ?', response=True)
         reprate = self.laser.send_command('$DFREQ ?', response=True)
         
-        if diode_current:
-            self.diode_current_layout.set_value(str(diode_current.split()[1]))
-        if diode_pulse_width:
-            self.diode_pulse_width_layout.set_value(str(diode_pulse_width.split()[1]))
+       
         if qs_delay:
             self.viron_qsdelay_entry.set_value(str(qs_delay.split()[1]))
         if qs_pre:
