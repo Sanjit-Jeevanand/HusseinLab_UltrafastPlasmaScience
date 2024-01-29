@@ -72,6 +72,26 @@ class Window(QMainWindow, Ui_MainWindow):
         self.laser = VironLaser(self.host, self.port, self.password, telnetgui=self.tngui)
         self.tngui.set_laser(self.laser)
         self.connected = False
+        self.currentstate = None
+        self.states = ['standby', 'stop', 'fire', 'single_shot']
+
+        self.status_timer = QTimer()
+        self.status_timer.timeout.connect(self.handle_get_status)
+        self.status_timer.setInterval(5000)
+
+        # connect button
+        self.viron_connect_button.clicked.connect(self.handle_connect_to_laser)
+        # standby button
+        self.viron_standby_button.clicked.connect(self.toggle_standby)
+        # stop button
+        self.viron_stop_button.clicked.connect(self.toggle_stop)
+        # auto fire button
+        self.viron_autofire_button.clicked.connect(self.toggle_autofire)
+        # single shot button
+        self.viron_singlefire_button.clicked.connect(self.toggle_singlefire)
+        
+        # init tngui layout
+        self.tngui_box.addWidget(self.tngui)
         # init statuses
         self.handle_get_status(status_hex="0x000000000000")
         # ----------------------------------------------------------------------------------------------
@@ -238,6 +258,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.qswitch_pre_layout.set_value(str(qs_pre).split()[1])
         if reprate:
             self.rep_rate_layout.set_value(str(reprate).split()[1])   
+            
     def _parse_status(self, hex_value):
         """
         Parses the status hex value into a dictionary containing the status information.
@@ -369,7 +390,129 @@ class Window(QMainWindow, Ui_MainWindow):
         self.status_label_left.setText(status_text_1)
         self.status_label_right.setText(status_text_2)
         
+    def handle_connect_to_laser(self):
+        """
+        Handles the action when the "Connect" button is clicked.
+        Attempts to connect to the laser using the provided host, port, and password.
+        Updates the GUI with the connection status.
+
+        Returns:
+            None
+        """
+        if self.laser.connect_to_laser():
+            self.viron_connect_button.setStyleSheet("background-color: green")
+            self.status_timer.start()
+            self.connected = True
+
+        else:
+            self.viron_connect_button.setStyleSheet("background-color: red")
+            self.connected = False
+
+    def toggle_standby(self):
+        """
+        Handles the action when the "Standby" button is clicked.
+        Sets the laser in standby mode and updates the GUI accordingly.
+
+        Returns:
+            None
+        """
+        if self.currentstate == 'standby':
+            return True
+        if self.laser.set_standby():
+            self.currentstate = 'standby'
+            self.viron_autofire_button.setChecked(False)
+            self.viron_stop_button.setChecked(False)
+            self.viron_singlefire_button.setChecked(False)
+            self.viron_singlefire_button.setStyleSheet("background-color : lightgrey")
+            self.viron_standby_button.setStyleSheet("background-color : lightgreen")
+            self.viron_stop_button.setStyleSheet("background-color : lightgrey")
+            self.viron_autofire_button.setStyleSheet("background-color : lightgrey")
+            return True
+        print("Failed to set laser to standby")
+        return False
+
+
+
+    def toggle_stop(self):
+        """
+        Handles the action when the "Stop" button is clicked.
+        Sets the laser in stop mode and updates the GUI accordingly.
+
+        Returns:
+            None
+        """
+        if self.currentstate == 'stop' and self.viron_stop_button.isChecked():
+            return True
         
+        if self.laser.set_stop():
+            self.currentstate = 'stop'
+            self.viron_standby_button.setChecked(False)
+            self.viron_autofire_button.setChecked(False)
+            self.viron_singlefire_button.setChecked(False)
+            self.viron_singlefire_button.setStyleSheet("background-color : lightgrey")
+            self.viron_standby_button.setStyleSheet("background-color : lightgrey")
+            self.viron_stop_button.setStyleSheet("background-color : lightgreen")
+            self.viron_autofire_button.setStyleSheet("background-color : lightgrey")
+            self.set_alignment_button.setStyleSheet("background-color: lightgrey")
+            return True
+        else:
+            print("failed to set stop")
+            return False
+
+
+    def toggle_autofire(self):
+        """
+        Handles the action when the "Fire Placeholder" button is clicked.
+        Sets the laser in fire mode and updates the GUI accordingly.
+
+        Returns:
+            None
+        """
+        if self.currentstate != 'fire':
+            # set to internal trigger
+            self.laser.send_command("$QSON 1")
+            
+        if self.laser.set_fire():
+            self.currentstate = 'fire'
+        else:
+            print("failed to set fire")
+            return
+        
+        self.viron_standby_button.setChecked(False)
+        self.viron_stop_button.setChecked(False)
+        self.viron_singlefire_button.setChecked(False)
+        self.viron_singlefire_button.setStyleSheet("background-color : lightgrey")
+        self.viron_standby_button.setStyleSheet("background-color : lightgrey")
+        self.viron_stop_button.setStyleSheet("background-color : lightgrey")
+        self.viron_autofire_button.setStyleSheet("background-color : red")
+        self.set_alignment_button.setStyleSheet("background-color: lightgrey")
+
+    def toggle_singlefire(self):
+        """
+        Handles the action when the "Set Single Shot" button is clicked.
+        Sets the laser in single shot mode and updates the GUI accordingly.
+
+        Returns:
+            None
+        """
+        if self.currentstate != 'single_shot':
+            if self.laser.set_single_shot():
+                self.currentstate = 'single_shot'
+            else:
+                print("Single Shot Not Set")
+                return
+
+            self.viron_standby_button.setChecked(False)
+            self.viron_stop_button.setChecked(False)
+            self.viron_autofire_button.setChecked(False)
+            self.viron_standby_button.setStyleSheet("background-color : lightgrey")
+            self.viron_stop_button.setStyleSheet("background-color : lightgrey")
+            self.viron_autofire_button.setStyleSheet("background-color : lightgrey")
+            self.viron_singlefire_button.setStyleSheet("background-color : red")
+            self.set_alignment_button.setStyleSheet("background-color: lightgrey")
+            
+        if self.laser.fire_single_shot():
+            print("fired mah lazor")   
     def _update_clock(self):
         current_date_time = QDate.currentDate().toString() + ' ' + QTime.currentTime().toString()
         self.clock_label.setText(current_date_time)

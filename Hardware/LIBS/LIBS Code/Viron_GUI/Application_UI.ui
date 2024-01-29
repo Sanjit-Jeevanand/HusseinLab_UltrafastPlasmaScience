@@ -2752,7 +2752,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="laser_control_tab">
        <attribute name="title">
@@ -2984,6 +2984,17 @@
        <attribute name="title">
         <string>Telnet Session</string>
        </attribute>
+       <widget class="QWidget" name="verticalLayoutWidget_3">
+        <property name="geometry">
+         <rect>
+          <x>230</x>
+          <y>20</y>
+          <width>601</width>
+          <height>481</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="tngui_box"/>
+       </widget>
       </widget>
      </widget>
     </widget>

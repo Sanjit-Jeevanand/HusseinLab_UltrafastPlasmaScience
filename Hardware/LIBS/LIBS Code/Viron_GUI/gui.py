@@ -1045,6 +1045,12 @@ class Ui_MainWindow(object):
         self.tabWidget_2.addTab(self.status_tab, "")
         self.telnet_session_tab = QtWidgets.QWidget()
         self.telnet_session_tab.setObjectName("telnet_session_tab")
+        self.verticalLayoutWidget_3 = QtWidgets.QWidget(self.telnet_session_tab)
+        self.verticalLayoutWidget_3.setGeometry(QtCore.QRect(230, 20, 601, 481))
+        self.verticalLayoutWidget_3.setObjectName("verticalLayoutWidget_3")
+        self.tngui_box = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_3)
+        self.tngui_box.setContentsMargins(0, 0, 0, 0)
+        self.tngui_box.setObjectName("tngui_box")
         self.tabWidget_2.addTab(self.telnet_session_tab, "")
         self.tabWidget.addTab(self.Viron_control_tab, "")
         self.clock_label = QtWidgets.QLabel(self.centralwidget)
@@ -1075,7 +1081,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(6)
-        self.tabWidget_2.setCurrentIndex(1)
+        self.tabWidget_2.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
