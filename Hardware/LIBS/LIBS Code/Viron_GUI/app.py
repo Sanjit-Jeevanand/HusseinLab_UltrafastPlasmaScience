@@ -423,10 +423,10 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_autofire_button.setChecked(False)
             self.viron_stop_button.setChecked(False)
             self.viron_singlefire_button.setChecked(False)
-            self.viron_singlefire_button.setStyleSheet("background-color : lightgrey")
-            self.viron_standby_button.setStyleSheet("background-color : lightgreen")
-            self.viron_stop_button.setStyleSheet("background-color : lightgrey")
-            self.viron_autofire_button.setStyleSheet("background-color : lightgrey")
+            self.viron_singlefire_button.setStyleSheet("background-color : darkgrey")
+            self.viron_standby_button.setStyleSheet("background-color : darkgreen")
+            self.viron_stop_button.setStyleSheet("background-color : darkgrey")
+            self.viron_autofire_button.setStyleSheet("background-color : darkgrey")
             return True
         print("Failed to set laser to standby")
         return False
@@ -449,10 +449,10 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_standby_button.setChecked(False)
             self.viron_autofire_button.setChecked(False)
             self.viron_singlefire_button.setChecked(False)
-            self.viron_singlefire_button.setStyleSheet("background-color : lightgrey")
-            self.viron_standby_button.setStyleSheet("background-color : lightgrey")
-            self.viron_stop_button.setStyleSheet("background-color : lightgreen")
-            self.viron_autofire_button.setStyleSheet("background-color : lightgrey")
+            self.viron_singlefire_button.setStyleSheet("background-color : darkgrey")
+            self.viron_standby_button.setStyleSheet("background-color : darkgrey")
+            self.viron_stop_button.setStyleSheet("background-color : darkgreen")
+            self.viron_autofire_button.setStyleSheet("background-color : darkgrey")
             return True
         else:
             print("failed to set stop")
@@ -480,9 +480,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.viron_standby_button.setChecked(False)
         self.viron_stop_button.setChecked(False)
         self.viron_singlefire_button.setChecked(False)
-        self.viron_singlefire_button.setStyleSheet("background-color : lightgrey")
-        self.viron_standby_button.setStyleSheet("background-color : lightgrey")
-        self.viron_stop_button.setStyleSheet("background-color : lightgrey")
+        self.viron_singlefire_button.setStyleSheet("background-color : darkgrey")
+        self.viron_standby_button.setStyleSheet("background-color : darkgrey")
+        self.viron_stop_button.setStyleSheet("background-color : darkgrey")
         self.viron_autofire_button.setStyleSheet("background-color : red")
 
     def toggle_singlefire(self):
@@ -503,9 +503,9 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_standby_button.setChecked(False)
             self.viron_stop_button.setChecked(False)
             self.viron_autofire_button.setChecked(False)
-            self.viron_standby_button.setStyleSheet("background-color : lightgrey")
-            self.viron_stop_button.setStyleSheet("background-color : lightgrey")
-            self.viron_autofire_button.setStyleSheet("background-color : lightgrey")
+            self.viron_standby_button.setStyleSheet("background-color : darkgrey")
+            self.viron_stop_button.setStyleSheet("background-color : darkgrey")
+            self.viron_autofire_button.setStyleSheet("background-color : darkgrey")
             self.viron_singlefire_button.setStyleSheet("background-color : red")
             
         if self.laser.fire_single_shot():
