@@ -253,11 +253,11 @@ class Window(QMainWindow, Ui_MainWindow):
         
        
         if qs_delay:
-            self.viron_qsdelay_entry.set_value(str(qs_delay.split()[1]))
+            self.viron_qsdelay_entry.setText(str(qs_delay.split()[1]))
         if qs_pre:
-            self.viron_qspre_entry.set_value(str(qs_pre).split()[1])
+            self.viron_qspre_entry.setText(str(qs_pre).split()[1])
         if reprate:
-            self.viron_reprate_entry.set_value(str(reprate).split()[1])   
+            self.viron_reprate_entry.setText(str(reprate).split()[1])   
             
     def _parse_status(self, hex_value):
         """
@@ -453,7 +453,6 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_standby_button.setStyleSheet("background-color : lightgrey")
             self.viron_stop_button.setStyleSheet("background-color : lightgreen")
             self.viron_autofire_button.setStyleSheet("background-color : lightgrey")
-            self.set_alignment_button.setStyleSheet("background-color: lightgrey")
             return True
         else:
             print("failed to set stop")
@@ -485,7 +484,6 @@ class Window(QMainWindow, Ui_MainWindow):
         self.viron_standby_button.setStyleSheet("background-color : lightgrey")
         self.viron_stop_button.setStyleSheet("background-color : lightgrey")
         self.viron_autofire_button.setStyleSheet("background-color : red")
-        self.set_alignment_button.setStyleSheet("background-color: lightgrey")
 
     def toggle_singlefire(self):
         """
@@ -509,7 +507,6 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_stop_button.setStyleSheet("background-color : lightgrey")
             self.viron_autofire_button.setStyleSheet("background-color : lightgrey")
             self.viron_singlefire_button.setStyleSheet("background-color : red")
-            self.set_alignment_button.setStyleSheet("background-color: lightgrey")
             
         if self.laser.fire_single_shot():
             print("fired mah lazor")  
