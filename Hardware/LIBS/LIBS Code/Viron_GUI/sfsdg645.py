@@ -5,8 +5,8 @@ class DG645:
             self.unit = ik.srs.SRSDG645.open_serial(comstring, 9600)
         except:
             self.unit = None
-            # raise IOError('Unable to connect to DG645 - Check your com port and ensure it was closed properly before'
-            #               ' connecting again')
+            raise IOError('Unable to connect to DG645 - Check your com port and ensure it was closed properly before'
+                          ' connecting again')
         else:
             print('Connection was successful.')
             print(self.unit.query('*IDN?'))

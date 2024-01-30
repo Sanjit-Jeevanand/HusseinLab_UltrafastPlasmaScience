@@ -12,6 +12,8 @@ from PyQt5.QtCore import QDate
 from pyqtgraph import PlotWidget
 from telnetGUI import TelnetSessionGUI
 from Viron import VironLaser
+from XPS import XPS, XPSnotFound
+
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -20,6 +22,12 @@ class Window(QMainWindow, Ui_MainWindow):
         # set up timer for the clock
         self.clock_timer = QTimer(self, interval=1000, timeout=self._update_clock)
         self.clock_timer.start()
+        
+        # init variables for if stuff is connected:
+        self.is_dg645_connected = False
+        self.is_scope_connected = False
+        self.is_viron_connected = False
+        self.is_xps_connected = False
         
         # ------------------------------------------------------------------------------------------
         # dg645 stuff: 
@@ -100,6 +108,99 @@ class Window(QMainWindow, Ui_MainWindow):
         # init statuses
         self.handle_get_status(status_hex="0x000000000000")
         # ----------------------------------------------------------------------------------------------
+        
+        
+        # XPS Stuff
+        # ------------------------------------------------------------------------------------------
+        # init xpses
+        try:
+            self.x_xps = XPS()
+            self.y_xps = XPS()
+        except XPSnotFound:
+            QMessageBox.critical(self, 'Error', 'Unable to connect to XPS. Motion control will be unavailable.')
+            self.xps_enable_button.setEnabled(False)
+            self.xps_init_button.setEnabled(False)
+            self.xps_kill_button.setEnabled(False)
+        else:
+            # max and min values for the stage
+            self.abs_min = [0, 0]
+            self.abs_max = [50, 50]
+
+            # X-Axis Combo Box
+            self.xps_groups = self.x_xps.getXPSStatus()
+            self.x_axis_select_box.clear()
+            self.x_axis_select_box.addItems(list(self.xps_groups.keys()))
+            self.x_axis = str(self.x_axis_select_box.currentText())
+            self.x_xps.setGroup(self.x_axis)
+            self.stageStatus = self.x_xps.getStageStatus(self.x_axis)
+            self.xps_update_group("X")
+            self.x_axis_select_box.activated.connect(lambda: self.xps_update_group("X"))
+
+            # Y-Axis Combo Box
+            self.y_axis_select_box.clear()
+            self.y_axis_select_box.addItems(list(self.xps_groups.keys()))
+            self.y_axis_select_box.setCurrentIndex(1)
+            self.y_axis = str(self.y_axis_select_box.currentText())
+            self.y_xps.setGroup(self.y_axis)
+            self.stageStatus = self.y_xps.getStageStatus(self.y_axis)
+            self.xps_update_group("Y")
+            self.y_axis_select_box.activated.connect(lambda: self.xps_update_group("Y"))
+            
+            # # Status Buttons
+            self.xps_init_button.clicked.connect(self.xps_initialize)
+            self.xps_kill_button.clicked.connect(self.xps_kill)
+            self.xps_enable_button.clicked.connect(self.xps_enable_disable)
+            
+            # Travel Limits
+            self.set_motion_bounds_button.clicked.connect(self.xps_set_minmax)
+            # self.x_min_travel_entry.textChanged.connect(lambda: self.set_minmax("x", "min", self.x_min_travel_entry.text()))
+            # self.x_max_travel_entry.textChanged.connect(lambda: self.set_minmax("x", "max", self.x_max_travel_entry.text()))
+            # self.y_min_travel_entry.textChanged.connect(lambda: self.set_minmax("y", "min", self.y_min_travel_entry.text()))
+            # self.y_max_travel_entry.textChanged.connect(lambda: self.set_minmax("y", "max", self.y_max_travel_entry.text()))
+            
+            # # Relative Motion Controls
+            # # self.rel_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            # self.left_btn.clicked.connect(lambda: self.relative('left'))
+            # self.right_btn.clicked.connect(lambda: self.relative('right'))
+            # self.down_btn.clicked.connect(lambda: self.relative('down'))
+            # self.up_btn.clicked.connect(lambda: self.relative('up'))
+
+            # # Absolute Motion Controls
+            # self.abs_x_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            # self.abs_y_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            # self.abs_move_btn.clicked.connect(self.absolute)
+
+            # # Reference Point Commands
+            # self.ref = [0, 0]
+            # self.set_btn.clicked.connect(lambda: self.ref_commands('set'))
+            # self.return_btn.clicked.connect(lambda: self.ref_commands('return'))
+            
+            # # Raster Input Boxes
+            # self.step_length_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            # self.step_length_line.textChanged.connect(lambda: self.raster_inp('step_length'))
+            # self.sample_length_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            # self.sample_length_line.textChanged.connect(lambda: self.raster_inp('sample_length'))
+            # self.sample_width_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            # self.sample_width_line.textChanged.connect(lambda: self.raster_inp('sample_width'))
+            # self.set_x_btn.clicked.connect(lambda: self.raster_inp('set_bound_x'))
+            # self.set_y_btn.clicked.connect(lambda: self.raster_inp('set_bound_y'))
+            # self.num_shots_line.setEnabled(False)
+            # self.num_shots_line.textChanged.connect(lambda: self.raster_inp('num_shots'))
+            
+            # # Raster Controls
+            # self.raster_btn.setEnabled(False)
+            # self.raster_btn.clicked.connect(self.start_timer)
+            # self.stop_btn_2.clicked.connect(self.end_timer)
+            
+            # # Timer and Printing of Stage Location
+            # self.print_timer = QtCore.QTimer(self, interval = 1000, timeout = self.print_location)
+            # self.print_timer.start()
+            # self.print_location()
+            
+            # ------------------------------------------------------------------------------------------
+        
+        
+        # ----------------------------------------------------------------------------------------------
         # DIAGNOSTIC INITALIZATION
         # ----------------------------------------------------------------------------------------------
         # self._init_dg645()
@@ -108,9 +209,107 @@ class Window(QMainWindow, Ui_MainWindow):
         # ----------------------------------------------------------------------------------------------
     
     
+    '''
+        __  ______  ____  
+        \ \/ /  _ \/ ___| 
+         \  /| |_) \___ \ 
+         /  \|  __/ ___) |
+        /_/\_\_|   |____/ 
+     _________________________________________________________________________________________________              
+    '''
+    def xps_update_group(self, axis):
+        '''
+        Sets and gets the status of a new actuator group after changing actuators.
+        
+        Parameters
+        ----------
+        axis (string) : The axis of travel that the actuator will be moving along. Either "X" for 
+                        x-axis or "Y" for y-axis
+        '''
+        self.xps_groups = self.x_xps.getXPSStatus()
+        if axis == "X": 
+            self.x_axis = str(self.x_axis_select_box.currentText())
+            self.x_xps.setGroup(self.x_axis)
+            self.update_status(self.x_xps.getStageStatus(self.x_axis))
+            
+        elif axis == "Y":
+            self.y_axis = str(self.y_axis_select_box.currentText())
+            self.y_xps.setGroup(self.y_axis)
+            self.update_status(self.y_xps.getStageStatus(self.y_axis))
+    
+    def xps_initialize(self):
+        '''
+        Initializes and homes both selected actuators.
+        '''
+        self.x_xps.initializeStage(self.x_axis)
+        self.x_xps.homeStage(self.x_axis)
+        self.y_xps.initializeStage(self.y_axis)
+        self.y_xps.homeStage(self.y_axis)
+        
+        self.update_status(self.x_xps.getStageStatus(self.x_axis))
+        self.update_status(self.y_xps.getStageStatus(self.y_axis))
+        
+    def xps_kill(self):
+        '''
+        Kills both selected actuators.
+        '''
+        self.x_xps.killAll(self.x_axis)
+        self.y_xps.killAll(self.y_axis)
+        
+        self.update_status(self.x_xps.getStageStatus(self.x_axis))
+        self.update_status(self.y_xps.getStageStatus(self.y_axis))
+
+    def xps_enable_disable(self):
+        '''
+        Enables or disables both selected actuators depending on its status.
+        '''
+        if self.x_xps.getStageStatus(self.x_axis).upper() == "Disabled state".upper() \
+            or self.y_xps.getStageStatus(self.y_axis).upper() == "Disabled state".upper():
+            self.x_xps.enableGroup(self.x_axis)
+            self.y_xps.enableGroup(self.y_axis)
+        elif self.x_xps.getStageStatus(self.x_axis)[:11].upper() == "Ready state".upper() \
+            or self.y_xps.getStageStatus(self.y_axis)[:11].upper() == "Ready state".upper():
+            self.x_xps.disableGroup(self.x_axis)
+            self.y_xps.disableGroup(self.y_axis)
+            
+        self.update_status(self.x_xps.getStageStatus(self.x_axis))
+        self.update_status(self.y_xps.getStageStatus(self.y_axis))
+        
+    def xps_set_minmax(self, axis, setting, val):
+        '''
+        Sets the minimum and maximum points of travel.
+        
+        Parameters
+        ----------
+        axis (string) : The axis of travel that the actuator will be moving along. Either "x" for 
+                        x-axis or "y" for y-axis
+        setting (string) : Setting of whether to set a minimum or maximum. "min" for minimum, 
+                           "max" for maximum.
+        val (string) : The value to set the minimum or maximum point as. Defaults to 0 for minumum 
+                       and 50 for maximum if nothing is inputted.
+        '''
+        xmin = self.x_min_travel_entry.text()
+        xmax = self.x_max_travel_entry.text()
+        ymin = self.y_min_travel_entry.text()
+        ymax = self.y_max_travel_entry.text()
+        
+        if float(xmin) < 0 or xmin == '' or float(xmin) > float(xmax):
+            xmin = 0
+        if float(xmax) > 50 or xmax == '' or float(xmax) < float(xmin):
+            xmax = 50
+        if float(ymin) < 0 or ymin == '' or float(ymin) > float(ymax):
+            ymin = 0
+        if float(ymax) > 50 or ymax == '' or float(ymax) < float(ymin):
+            ymax = 50
+        
+        self.x_xps.setminLimit(self.x_axis, float(xmin))
+        self.x_xps.setmaxLimit(self.x_axis, float(xmax))
+        self.y_xps.setminLimit(self.y_axis, float(ymin))
+        self.y_xps.setmaxLimit(self.y_axis, float(ymax))        
+        
     
     '''
-        _______   _______    __    _  _     _____  
+         _______   _______    __    _  _     _____  
         |       \ /  _____|  / /   | || |   | ____| 
         |  .--.  |  |  __   / /_   | || |_  | |__   
         |  |  |  |  | |_ | | '_ \  |__   _| |___ \  
