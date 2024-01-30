@@ -27,20 +27,10 @@ class Window(QMainWindow, Ui_MainWindow):
         self.is_dg645_connected = False
         self.is_scope_connected = False
         self.is_xps_connected = False
+        self.viron_connected = False
         
         
-        # ----------------------------------------------------------------------------------------------
-        # DIAGNOSTIC INITALIZATION
-        # ----------------------------------------------------------------------------------------------
-        if self._init_dg645():
-            self.is_dg645_connected = True
-            self.dg645_isconnected_label.setText("Connected")
-            self.dg645_isconnected_label.setStyleSheet("color: green")
-        if self._init_scope():
-            self.is_scope_connected = True
-            self.scope_isconnected_label.setText("Connected")
-            self.scope_isconnected_label.setStyleSheet("color: green")
-        self._init_viron()
+
         
         
         # ------------------------------------------------------------------------------------------
@@ -104,8 +94,6 @@ class Window(QMainWindow, Ui_MainWindow):
         self.viron_set_qsdelay_button.clicked.connect(self.handle_set_qs_delay)
         # set qs pre
         self.viron_qspre_set_button.clicked.connect(self.handle_set_qs_pre)
-        # init tngui layout
-        self.tngui_box.addWidget(self.tngui)
         # init statuses
         self.handle_get_status(status_hex="0x000000000000")
         # ----------------------------------------------------------------------------------------------
@@ -196,6 +184,18 @@ class Window(QMainWindow, Ui_MainWindow):
             
             # ------------------------------------------------------------------------------------------
         
+            # ----------------------------------------------------------------------------------------------
+        # DIAGNOSTIC INITALIZATION
+        # ----------------------------------------------------------------------------------------------
+        if self._init_dg645():
+            self.is_dg645_connected = True
+            self.dg645_isconnected_label.setText("Connected")
+            self.dg645_isconnected_label.setStyleSheet("color: green")
+        if self._init_scope():
+            self.is_scope_connected = True
+            self.scope_isconnected_label.setText("Connected")
+            self.scope_isconnected_label.setStyleSheet("color: green")
+        self._init_viron()
         
 
         # ----------------------------------------------------------------------------------------------
@@ -451,7 +451,7 @@ class Window(QMainWindow, Ui_MainWindow):
             QMessageBox.critical(self, 'Error', 'Unable to connect to oscilloscope - Check your com port and ensure it was closed properly before connecting again')
             return False
         else:
-            self._scope_get_all_values()
+            # self._scope_get_all_values()
             return True
     def _scope_set_data_source(self, source):
         self.scope.set_data_source(source)
@@ -498,6 +498,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_connected = False
             self.currentstate = None
             self.states = ['standby', 'stop', 'fire', 'single_shot']
+            self.tngui_box.addWidget(self.tngui)
             self.status_timer = QTimer()
             self.status_timer.timeout.connect(self.handle_get_status)
             self.status_timer.setInterval(5000)
@@ -636,10 +637,11 @@ class Window(QMainWindow, Ui_MainWindow):
         status_text += f"  Remote interlock: {status['Remote Interlock Laser']}\n"
         status_text += f"  System Interlock: {status['System Interlock System/TEC Temp/Sys OK']}\n"
         status_text += f"  Laser Node Interlock: {status['System Interlock Laser Node']}\n"
-        temps = self.laser.get_temps()
-        status_text += "Temperatures:\n"
-        status_text += f"  Laser Temp: {temps['Laser Temp']} C\n"
-        status_text += f"  Diode Temp: {temps['Diode Temp']} C\n"
+        if self.viron_connected:
+            temps = self.laser.get_temps()
+            status_text += "Temperatures:\n"
+            status_text += f"  Laser Temp: {temps['Laser Temp']} C\n"
+            status_text += f"  Diode Temp: {temps['Diode Temp']} C\n"
         self.critical_status_label.setText(status_text)
         
         
