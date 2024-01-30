@@ -111,6 +111,10 @@ class Window(QMainWindow, Ui_MainWindow):
             self.xps_init_button.setEnabled(False)
             self.xps_kill_button.setEnabled(False)
         else:
+            self.abs_x_lcd.setDigitCount(5)
+            self.abs_y_lcd.setDigitCount(5)
+            self.xps_isconnected_label.setText("Connected")
+            self.xps_isconnected_label.setStyleSheet("color: green")
             # max and min values for the stage
             self.abs_min = [0, 0]
             self.abs_max = [50, 50]
@@ -153,7 +157,7 @@ class Window(QMainWindow, Ui_MainWindow):
             # Absolute Motion Controls
             # self.abs_x_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
             # self.abs_y_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-            self.abs_move_btn.clicked.connect(self.absolute)
+            self.abs_goto_button.clicked.connect(self.absolute)
 
             # # Reference Point Commands
             self.ref = [0, 0]
@@ -222,12 +226,12 @@ class Window(QMainWindow, Ui_MainWindow):
         if axis == "X": 
             self.x_axis = str(self.x_axis_select_box.currentText())
             self.x_xps.setGroup(self.x_axis)
-            self.update_status(self.x_xps.getStageStatus(self.x_axis))
+            # self.update_status(self.x_xps.getStageStatus(self.x_axis))
             
         elif axis == "Y":
             self.y_axis = str(self.y_axis_select_box.currentText())
             self.y_xps.setGroup(self.y_axis)
-            self.update_status(self.y_xps.getStageStatus(self.y_axis))
+            # self.update_status(self.y_xps.getStageStatus(self.y_axis))
     
     def xps_initialize(self):
         '''
@@ -238,8 +242,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.y_xps.initializeStage(self.y_axis)
         self.y_xps.homeStage(self.y_axis)
         
-        self.update_status(self.x_xps.getStageStatus(self.x_axis))
-        self.update_status(self.y_xps.getStageStatus(self.y_axis))
+        # self.update_status(self.x_xps.getStageStatus(self.x_axis))
+        # self.update_status(self.y_xps.getStageStatus(self.y_axis))
         
     def xps_kill(self):
         '''
@@ -248,8 +252,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.x_xps.killAll(self.x_axis)
         self.y_xps.killAll(self.y_axis)
         
-        self.update_status(self.x_xps.getStageStatus(self.x_axis))
-        self.update_status(self.y_xps.getStageStatus(self.y_axis))
+        # self.update_status(self.x_xps.getStageStatus(self.x_axis))
+        # self.update_status(self.y_xps.getStageStatus(self.y_axis))
 
     def xps_enable_disable(self):
         '''
@@ -264,10 +268,10 @@ class Window(QMainWindow, Ui_MainWindow):
             self.x_xps.disableGroup(self.x_axis)
             self.y_xps.disableGroup(self.y_axis)
             
-        self.update_status(self.x_xps.getStageStatus(self.x_axis))
-        self.update_status(self.y_xps.getStageStatus(self.y_axis))
+        # self.update_status(self.x_xps.getStageStatus(self.x_axis))
+        # self.update_status(self.y_xps.getStageStatus(self.y_axis))
         
-    def xps_set_minmax(self, axis, setting, val):
+    def xps_set_minmax(self):
         '''
         Sets the minimum and maximum points of travel.
         
@@ -319,7 +323,7 @@ class Window(QMainWindow, Ui_MainWindow):
                 self.y_xps.moveRelative(self.y_axis, dist)
             if btn == 'down':
                 self.y_xps.moveRelative(self.y_axis, 0-dist)
-       
+        self.print_location()
        
     def absolute(self):
         '''
@@ -332,7 +336,9 @@ class Window(QMainWindow, Ui_MainWindow):
         if self.abs_y_entry.text():
             pos = float(self.abs_y_entry.text())
             self.y_xps.moveAbsolute(self.y_axis, pos)
-            
+        self.print_location()
+
+
     def ref_commands(self, cmd):
         '''
         Controls commands relating to the reference point of the stage.
@@ -355,13 +361,12 @@ class Window(QMainWindow, Ui_MainWindow):
         status and enables/disables accordingly.
         '''
         abs = [self.x_xps.getStagePosition(self.x_axis), self.y_xps.getStagePosition(self.y_axis)]
-        
         self.abs_x_lcd.display(abs[0])
         self.abs_y_lcd.display(abs[1])
         self.relative_x_lcd.display(abs[0]-self.ref[0])
         self.relative_y_lcd.display(abs[1]-self.ref[1])
         
-        self.update_status(self.x_xps.getStageStatus(self.x_axis))  
+        # self.update_status(self.x_xps.getStageStatus(self.x_axis))  
         
                               
     '''
