@@ -154,28 +154,24 @@ class Window(QMainWindow, Ui_MainWindow):
             
             # Travel Limits
             self.set_motion_bounds_button.clicked.connect(self.xps_set_minmax)
-            # self.x_min_travel_entry.textChanged.connect(lambda: self.set_minmax("x", "min", self.x_min_travel_entry.text()))
-            # self.x_max_travel_entry.textChanged.connect(lambda: self.set_minmax("x", "max", self.x_max_travel_entry.text()))
-            # self.y_min_travel_entry.textChanged.connect(lambda: self.set_minmax("y", "min", self.y_min_travel_entry.text()))
-            # self.y_max_travel_entry.textChanged.connect(lambda: self.set_minmax("y", "max", self.y_max_travel_entry.text()))
             
-            # # Relative Motion Controls
-            # # self.rel_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-            # self.left_btn.clicked.connect(lambda: self.relative('left'))
-            # self.right_btn.clicked.connect(lambda: self.relative('right'))
-            # self.down_btn.clicked.connect(lambda: self.relative('down'))
-            # self.up_btn.clicked.connect(lambda: self.relative('up'))
+            # Relative Motion Controls
+            # self.jog_length_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            self.left_btn.clicked.connect(lambda: self.relative('left'))
+            self.right_btn.clicked.connect(lambda: self.relative('right'))
+            self.down_btn.clicked.connect(lambda: self.relative('down'))
+            self.up_btn.clicked.connect(lambda: self.relative('up'))
 
-            # # Absolute Motion Controls
-            # self.abs_x_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-            # self.abs_y_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-            # self.abs_move_btn.clicked.connect(self.absolute)
+            # Absolute Motion Controls
+            # self.abs_x_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            # self.abs_y_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            self.abs_move_btn.clicked.connect(self.absolute)
 
             # # Reference Point Commands
-            # self.ref = [0, 0]
-            # self.set_btn.clicked.connect(lambda: self.ref_commands('set'))
-            # self.return_btn.clicked.connect(lambda: self.ref_commands('return'))
-            
+            self.ref = [0, 0]
+            self.set_home_button.clicked.connect(lambda: self.ref_commands('set'))
+            self.go_home_button.clicked.connect(lambda: self.ref_commands('return'))
+
             # # Raster Input Boxes
             # self.step_length_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
             # self.step_length_line.textChanged.connect(lambda: self.raster_inp('step_length'))
@@ -193,10 +189,10 @@ class Window(QMainWindow, Ui_MainWindow):
             # self.raster_btn.clicked.connect(self.start_timer)
             # self.stop_btn_2.clicked.connect(self.end_timer)
             
-            # # Timer and Printing of Stage Location
-            # self.print_timer = QtCore.QTimer(self, interval = 1000, timeout = self.print_location)
-            # self.print_timer.start()
-            # self.print_location()
+            # Timer and Printing of Stage Location
+            self.print_timer = QTimer(self, interval = 1000, timeout = self.print_location)
+            self.print_timer.start()
+            self.print_location()
             
             # ------------------------------------------------------------------------------------------
         
@@ -303,7 +299,71 @@ class Window(QMainWindow, Ui_MainWindow):
         self.y_xps.setminLimit(self.y_axis, float(ymin))
         self.y_xps.setmaxLimit(self.y_axis, float(ymax))        
         
-    
+    def relative(self, btn):
+        '''
+        Controls relative movements of the stage (relative stepping left, right, up, down).
+        
+        Parameters
+        ----------
+        btn (string) : Button pressed that determines the direction of step.
+        '''
+        if self.jog_length_entry.text():
+            # Gets the step length to step relatively by
+            dist = float(self.jog_length_entry.text())
+            
+            if btn == 'left':
+                self.x_xps.moveRelative(self.x_axis, 0-dist)
+            elif btn == 'right':
+                self.x_xps.moveRelative(self.x_axis, dist)
+            if btn == 'up':
+                self.y_xps.moveRelative(self.y_axis, dist)
+            if btn == 'down':
+                self.y_xps.moveRelative(self.y_axis, 0-dist)
+       
+       
+    def absolute(self):
+        '''
+        Controls absolute movements of the stage. X and y-axes can move absolutely 
+        independantly of eachother.
+        '''
+        if self.abs_x_entry.text():
+            pos = float(self.abs_x_entry.text())
+            self.x_xps.moveAbsolute(self.x_axis, pos)
+        if self.abs_y_entry.text():
+            pos = float(self.abs_y_entry.text())
+            self.y_xps.moveAbsolute(self.y_axis, pos)
+            
+    def ref_commands(self, cmd):
+        '''
+        Controls commands relating to the reference point of the stage.
+        
+        Parameters
+        ----------
+        cmd (string) : Button pressed that determines what command to trigger ("set" or "return").
+        '''
+        if cmd == 'set':
+            self.ref = [self.x_xps.getStagePosition(self.x_axis), self.y_xps.getStagePosition(self.y_axis)]
+            self.home_x_lcd.display(self.ref[0])
+            self.home_y_lcd.display(self.ref[1])
+        elif cmd == 'return':
+            self.x_xps.moveAbsolute(self.x_axis, self.ref[0])
+            self.y_xps.moveAbsolute(self.y_axis, self.ref[1])
+            
+    def print_location(self):
+        '''
+        Prints the absolute and relative location of the 2 actuators. Also checks actuator 
+        status and enables/disables accordingly.
+        '''
+        abs = [self.x_xps.getStagePosition(self.x_axis), self.y_xps.getStagePosition(self.y_axis)]
+        
+        self.abs_x_lcd.display(abs[0])
+        self.abs_y_lcd.display(abs[1])
+        self.relative_x_lcd.display(abs[0]-self.ref[0])
+        self.relative_y_lcd.display(abs[1]-self.ref[1])
+        
+        self.update_status(self.x_xps.getStageStatus(self.x_axis))  
+        
+                              
     '''
          _______   _______    __    _  _     _____  
         |       \ /  _____|  / /   | || |   | ____| 
