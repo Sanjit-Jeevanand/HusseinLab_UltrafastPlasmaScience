@@ -26,8 +26,22 @@ class Window(QMainWindow, Ui_MainWindow):
         # init variables for if stuff is connected:
         self.is_dg645_connected = False
         self.is_scope_connected = False
-        self.is_viron_connected = False
         self.is_xps_connected = False
+        
+        
+        # ----------------------------------------------------------------------------------------------
+        # DIAGNOSTIC INITALIZATION
+        # ----------------------------------------------------------------------------------------------
+        if self._init_dg645():
+            self.is_dg645_connected = True
+            self.dg645_isconnected_label.setText("Connected")
+            self.dg645_isconnected_label.setStyleSheet("color: green")
+        if self._init_scope():
+            self.is_scope_connected = True
+            self.scope_isconnected_label.setText("Connected")
+            self.scope_isconnected_label.setStyleSheet("color: green")
+        self._init_viron()
+        
         
         # ------------------------------------------------------------------------------------------
         # dg645 stuff: 
@@ -72,20 +86,7 @@ class Window(QMainWindow, Ui_MainWindow):
         '''
         
         # ----------------------------------------------------------------------------------------------
-        # Viron Stuff
-        self.host = "192.168.103.103"
-        self.port = 23
-        self.password = "VR6BE4EE"
-        self.tngui = TelnetSessionGUI()
-        self.laser = VironLaser(self.host, self.port, self.password, telnetgui=self.tngui)
-        self.tngui.set_laser(self.laser)
-        self.connected = False
-        self.currentstate = None
-        self.states = ['standby', 'stop', 'fire', 'single_shot']
 
-        self.status_timer = QTimer()
-        self.status_timer.timeout.connect(self.handle_get_status)
-        self.status_timer.setInterval(5000)
 
         # connect button
         self.viron_connect_button.clicked.connect(self.handle_connect_to_laser)
@@ -200,12 +201,7 @@ class Window(QMainWindow, Ui_MainWindow):
             # ------------------------------------------------------------------------------------------
         
         
-        # ----------------------------------------------------------------------------------------------
-        # DIAGNOSTIC INITALIZATION
-        # ----------------------------------------------------------------------------------------------
-        # self._init_dg645()
-        self._init_scope()
-        
+
         # ----------------------------------------------------------------------------------------------
     
     
@@ -322,11 +318,13 @@ class Window(QMainWindow, Ui_MainWindow):
             self.dg645 = DG645("COM4")
         except:
             QMessageBox.critical(self, 'Error', 'Unable to connect to DG645 - Check your com port and ensure it was closed properly before connecting again')
+            return False
         else:
             self._dg645_get_all_delays()
             self._dg645_get_amplitude_offset()
             self._dg645_get_trigger_source()
-            
+            return True
+        
     def _dg645_display_delay(self, target):
         # display them delays
         self.dg645.display_delay(target)
@@ -391,9 +389,10 @@ class Window(QMainWindow, Ui_MainWindow):
             self.scope = scope()
         except:
             QMessageBox.critical(self, 'Error', 'Unable to connect to oscilloscope - Check your com port and ensure it was closed properly before connecting again')
+            return False
         else:
             self._scope_get_all_values()
-
+            return True
     def _scope_set_data_source(self, source):
         self.scope.set_data_source(source)
         
@@ -423,6 +422,28 @@ class Window(QMainWindow, Ui_MainWindow):
            \_/  |___|_| \_\\___/|_| \_|
         _________________________________________________________________________________________________'''
         
+    def _init_viron(self):
+        self.host = "192.168.103.103"
+        self.port = 23
+        self.password = "VR6BE4EE"
+        try:
+            self.tngui = TelnetSessionGUI()
+            self.laser = VironLaser(self.host, self.port, self.password, telnetgui=self.tngui)
+            self.tngui.set_laser(self.laser)
+        except:
+            print("failure initalizing Viron")
+            return False
+
+        else:
+            self.viron_connected = False
+            self.currentstate = None
+            self.states = ['standby', 'stop', 'fire', 'single_shot']
+            self.status_timer = QTimer()
+            self.status_timer.timeout.connect(self.handle_get_status)
+            self.status_timer.setInterval(5000)
+            return True
+        
+        
     def handle_get_status(self, status_hex=None):
         """
         Handles the action when the "Get Status" button is clicked.
@@ -433,7 +454,7 @@ class Window(QMainWindow, Ui_MainWindow):
             None
         """
         if status_hex is None:
-            if self.connected:
+            if self.viron_connected:
                 status_hex = self.laser.get_status()
             else:
                 return
@@ -442,7 +463,7 @@ class Window(QMainWindow, Ui_MainWindow):
             
         self.display_status(status)
         self.display_critical_info(status)
-        if self.connected:
+        if self.viron_connected:
             self._get_values()
         
     def _get_values(self):
@@ -600,12 +621,16 @@ class Window(QMainWindow, Ui_MainWindow):
         """
         if self.laser.connect_to_laser():
             self.viron_connect_button.setStyleSheet("background-color: green")
+            self.viron_isconnected_label.setText("Connected")
+            self.viron_isconnected_label.setStyleSheet("color: green")
             self.status_timer.start()
-            self.connected = True
+            self.viron_connected = True
 
         else:
             self.viron_connect_button.setStyleSheet("background-color: red")
-            self.connected = False
+            self.viron_isconnected_label.setText("Not Connected")
+            self.viron_isconnected_label.setStyleSheet("color: red")
+            self.viron_connected = False
 
     def toggle_standby(self):
         """
