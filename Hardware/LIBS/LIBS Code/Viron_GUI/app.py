@@ -928,7 +928,16 @@ class Window(QMainWindow, Ui_MainWindow):
                 print('Q-Switch Pre Set to ', delay)
                 return True
         return False
-             
+     
+     
+    def fire_laser_single(self):
+        
+        if self.viron_connected:
+            self.fire()
+            
+    def fire(self):
+        self.dg645.sendcmd('*TRG') 
+                
     def _update_clock(self):
         current_date_time = QDate.currentDate().toString() + ' ' + QTime.currentTime().toString()
         self.clock_label.setText(current_date_time)

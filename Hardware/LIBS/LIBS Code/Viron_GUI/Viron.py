@@ -265,6 +265,8 @@ class VironLaser():
             return False
         if not self.send_command("$QSBLANK 0"):
             return False
+        if not self.send_command("$FIRE"):
+            return False
         return True
        
     def fire_single_shot(self):
