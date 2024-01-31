@@ -31,8 +31,12 @@ class Window(QMainWindow, Ui_MainWindow):
         self.is_scope_connected = False
         self.is_xps_connected = False
         self.viron_connected = False
+        self.are_specs_connected = False
         
         
+        # ------------------------------------------------------------------------------------------
+        # bottom buttons
+        self.fire_button.clicked.connect(self.fire_laser_single)
         # ------------------------------------------------------------------------------------------
         # dg645 stuff: 
         # init lists for easier access
@@ -931,9 +935,18 @@ class Window(QMainWindow, Ui_MainWindow):
      
      
     def fire_laser_single(self):
+        if self.are_specs_connected:
+            # arm spectrometers
+            pass
         
         if self.viron_connected:
             self.fire()
+            
+        if self.are_specs_connected:
+            # join spectrometers
+            # process data in separate thread
+            pass
+        
             
     def fire(self):
         self.dg645.sendcmd('*TRG') 
