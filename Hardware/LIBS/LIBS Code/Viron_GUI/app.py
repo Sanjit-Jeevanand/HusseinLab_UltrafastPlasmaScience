@@ -15,6 +15,8 @@ from telnetGUI import TelnetSessionGUI
 from Viron import VironLaser
 from XPS import XPS, XPSnotFound
 
+
+
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -170,8 +172,8 @@ class Window(QMainWindow, Ui_MainWindow):
             self.auto_step_length_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
             self.auto_sample_length_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
             self.auto_sample_width_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-            self.num_shots_line.setEnabled(False)
-            self.num_shots_line.textChanged.connect(lambda: self.raster_inp('num_shots'))
+            # self.num_shots_line.setEnabled(False)
+            # self.num_shots_line.textChanged.connect(lambda: self.raster_inp('num_shots'))
             
             # # Raster Controls
             self.auto_raster_button.setEnabled(False)
@@ -368,15 +370,17 @@ class Window(QMainWindow, Ui_MainWindow):
         
     def verify_raster_inputs(self):
         '''
-        Checks and validates the inputs given to raster. Also clears the number of shots line
-        after editing other inputs and enables/disables the raster button depending on whether
-        all inputs have been entered.
-        
-        Parameters
-        ----------
-        inp (string) : LineEdit box that was edited.
+        Checks and validates the inputs given to raster.
+    
         '''
+        step_length = float(self.auto_step_length_entry.text())
+        max_step = float(self.auto_max_steps_entry.text())
+        num_of_steps = float(self.auto_num_steps_entry.text())
+        shots_at_location = float(self.auto_shots_at_location_entry.text())
+        rep_rate = float(self.auto_rep_rate_entry.text())
         
+        self.step_length = step_length
+        pass# todo implement
         # if inp == 'step_length':
         #     if self.step_length_line.text():
         #         self.step_length = float(self.step_length_line.text())
