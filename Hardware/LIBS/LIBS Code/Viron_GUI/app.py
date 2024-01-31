@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import QTimer, QTime
 from PyQt5.uic import loadUi
+from PyQt5 import QtGui
 import qdarktheme
 from gui import Ui_MainWindow
 from PyQt5.QtCore import QDate
@@ -155,8 +156,8 @@ class Window(QMainWindow, Ui_MainWindow):
             self.up_btn.clicked.connect(lambda: self.relative('up'))
 
             # Absolute Motion Controls
-            # self.abs_x_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-            # self.abs_y_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            self.abs_x_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            self.abs_y_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
             self.abs_goto_button.clicked.connect(self.absolute)
 
             # # Reference Point Commands
@@ -165,21 +166,18 @@ class Window(QMainWindow, Ui_MainWindow):
             self.go_home_button.clicked.connect(lambda: self.ref_commands('return'))
 
             # # Raster Input Boxes
-            # self.step_length_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-            # self.step_length_line.textChanged.connect(lambda: self.raster_inp('step_length'))
-            # self.sample_length_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-            # self.sample_length_line.textChanged.connect(lambda: self.raster_inp('sample_length'))
-            # self.sample_width_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-            # self.sample_width_line.textChanged.connect(lambda: self.raster_inp('sample_width'))
-            # self.set_x_btn.clicked.connect(lambda: self.raster_inp('set_bound_x'))
-            # self.set_y_btn.clicked.connect(lambda: self.raster_inp('set_bound_y'))
-            # self.num_shots_line.setEnabled(False)
-            # self.num_shots_line.textChanged.connect(lambda: self.raster_inp('num_shots'))
+            self.raster_verify_input_button.clicked.connect(self.verify_raster_inputs) 
+            self.auto_step_length_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            self.auto_sample_length_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            self.auto_sample_width_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            self.num_shots_line.setEnabled(False)
+            self.num_shots_line.textChanged.connect(lambda: self.raster_inp('num_shots'))
             
             # # Raster Controls
-            # self.raster_btn.setEnabled(False)
-            # self.raster_btn.clicked.connect(self.start_timer)
-            # self.stop_btn_2.clicked.connect(self.end_timer)
+            self.auto_raster_button.setEnabled(False)
+            # ToDo:
+            # self.auto_raster_button.clicked.connect(self.start_timer)
+            # self.auto_raster_kill_button.clicked.connect(self.end_timer)
             
             # Timer and Printing of Stage Location
             self.print_timer = QTimer(self, interval = 1000, timeout = self.print_location)
@@ -368,7 +366,86 @@ class Window(QMainWindow, Ui_MainWindow):
         
         # self.update_status(self.x_xps.getStageStatus(self.x_axis))  
         
-                              
+    def verify_raster_inputs(self):
+        '''
+        Checks and validates the inputs given to raster. Also clears the number of shots line
+        after editing other inputs and enables/disables the raster button depending on whether
+        all inputs have been entered.
+        
+        Parameters
+        ----------
+        inp (string) : LineEdit box that was edited.
+        '''
+        
+        # if inp == 'step_length':
+        #     if self.step_length_line.text():
+        #         self.step_length = float(self.step_length_line.text())
+                
+        # elif inp == 'sample_length':
+        #     max_length = self.abs_max[0] - self.ref[0]
+        #     if self.sample_length_line.text():
+        #         if float(self.sample_length_line.text()) > max_length:
+        #             self.sample_length_line.setText(str(max_length))
+        #         self.sample_length = float(self.sample_length_line.text())
+                
+        # elif inp == 'sample_width':
+        #     max_width = self.abs_max[1] - self.ref[1]
+        #     if self.sample_width_line.text():
+        #         if float(self.sample_width_line.text()) > max_width:
+        #             self.sample_width_line.setText(str(max_width))
+        #         self.sample_width = float(self.sample_width_line.text())
+                
+        # elif inp == 'set_bound_x':
+        #     self.sample_length = np.abs(self.x_xps.getStagePosition(self.x_axis) - self.ref[0])
+        #     self.sample_length_line.setText(str(self.sample_length))
+            
+        # elif inp == 'set_bound_y':
+        #     self.sample_width = np.abs(self.y_xps.getStagePosition(self.y_axis) - self.ref[1])
+        #     self.sample_width_line.setText(str(self.sample_width))
+            
+        # elif inp == "shots_same_loc":
+        #     try:
+        #         self.num_shots_same_loc = int(self.num_shots_same_loc_txt.text())
+        #     except:
+        #         self.num_shots_same_loc = 1
+        #         return
+        #     # self.total_shots_2.setText(str(self.num_shots_same_loc*self.num_shots))
+        
+        # elif inp == 'num_shots':
+        #     if self.num_shots_line.text():
+        #         self.num_shots = int(self.num_shots_line.text())
+        #     if self.step_length_line.text() and self.sample_length_line.text() \
+        #         and self.sample_width_line.text() and not self.messages.text():
+        #         self.raster_btn.setEnabled(True)
+        #     # self.total_shots_2.setText(str(self.num_shots_same_loc*self.num_shots))
+        #     return
+
+        
+        # # Clears num shots line if other inputs have been changed.
+        # self.num_shots_line.clear()
+        # self.raster_btn.setEnabled(False)
+        # self.num_shots_line.setEnabled(False)
+        
+        # # # Calculates the maximum number of shots if all inputs have been filled.
+        # # if self.step_length_line.text() and self.sample_length_line.text() and self.sample_width_line.text():
+        # #     if self.step_length == 0:
+        # #         self.messages.setText('ERROR: step length cannot be 0')
+        # #         return
+        # #     if self.step_length > self.sample_length:
+        # #         self.messages.setText('ERROR: step cannot be greater than sample length')
+        # #         return
+        # #     if self.step_length > self.sample_width:
+        # #         self.messages.setText('ERROR: step cannot be greater than sample width')
+        # #         return
+        #     self.max_cols = floor(Fraction(self.sample_length)/Fraction(self.step_length))
+        #     self.max_rows = floor(Fraction(self.sample_width)/Fraction(self.step_length))
+        #     self.max_shots = self.max_rows * self.max_cols
+        #     self.max_shots_lbl.setText(str(self.max_shots))
+        #     self.num_shots_line.setValidator(QtGui.QIntValidator(1, self.max_shots, self))
+            
+        #     self.num_shots_line.setEnabled(True)
+                    
+        pass          
     '''
          _______   _______    __    _  _     _____  
         |       \ /  _____|  / /   | || |   | ____| 

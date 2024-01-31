@@ -2143,7 +2143,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Automated Scan Setup</string>
+        <string>Automated Scan Setup (not implemented)</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -2153,7 +2153,7 @@
        <property name="geometry">
         <rect>
          <x>170</x>
-         <y>210</y>
+         <y>150</y>
          <width>131</width>
          <height>21</height>
         </rect>
@@ -2166,7 +2166,7 @@
        <property name="geometry">
         <rect>
          <x>170</x>
-         <y>240</y>
+         <y>170</y>
          <width>191</width>
          <height>31</height>
         </rect>
@@ -2179,7 +2179,7 @@
        <property name="geometry">
         <rect>
          <x>170</x>
-         <y>120</y>
+         <y>60</y>
          <width>131</width>
          <height>21</height>
         </rect>
@@ -2192,7 +2192,7 @@
        <property name="geometry">
         <rect>
          <x>170</x>
-         <y>180</y>
+         <y>120</y>
          <width>131</width>
          <height>20</height>
         </rect>
@@ -2215,7 +2215,7 @@
        <property name="geometry">
         <rect>
          <x>60</x>
-         <y>150</y>
+         <y>90</y>
          <width>91</width>
          <height>16</height>
         </rect>
@@ -2231,7 +2231,7 @@
        <property name="geometry">
         <rect>
          <x>60</x>
-         <y>210</y>
+         <y>150</y>
          <width>101</width>
          <height>16</height>
         </rect>
@@ -2253,19 +2253,6 @@
         </rect>
        </property>
       </widget>
-      <widget class="QLineEdit" name="auto_sample_length_entry">
-       <property name="geometry">
-        <rect>
-         <x>170</x>
-         <y>60</y>
-         <width>131</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
       <widget class="QLabel" name="step_length_label">
        <property name="geometry">
         <rect>
@@ -2282,27 +2269,11 @@
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="sample_width_label">
-       <property name="geometry">
-        <rect>
-         <x>60</x>
-         <y>90</y>
-         <width>101</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Sample Width (mm):</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-       </property>
-      </widget>
       <widget class="QLineEdit" name="auto_num_shots_entry">
        <property name="geometry">
         <rect>
          <x>170</x>
-         <y>150</y>
+         <y>90</y>
          <width>131</width>
          <height>21</height>
         </rect>
@@ -2328,7 +2299,7 @@
        <property name="geometry">
         <rect>
          <x>60</x>
-         <y>120</y>
+         <y>60</y>
          <width>61</width>
          <height>16</height>
         </rect>
@@ -2340,24 +2311,11 @@
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLineEdit" name="auto_sample_width_entry">
-       <property name="geometry">
-        <rect>
-         <x>170</x>
-         <y>90</y>
-         <width>131</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
       <widget class="QLabel" name="shot_num_label">
        <property name="geometry">
         <rect>
          <x>60</x>
-         <y>180</y>
+         <y>120</y>
          <width>101</width>
          <height>16</height>
         </rect>
@@ -2369,20 +2327,43 @@
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="sample_length_label">
+      <widget class="QPushButton" name="auto_raster_button">
        <property name="geometry">
         <rect>
-         <x>60</x>
-         <y>60</y>
+         <x>310</x>
+         <y>120</y>
          <width>101</width>
-         <height>16</height>
+         <height>21</height>
         </rect>
        </property>
        <property name="text">
-        <string>Sample Length (mm):</string>
+        <string>Raster</string>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </widget>
+      <widget class="QPushButton" name="auto_raster_kill_button">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>150</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Kill</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="raster_verify_input_button">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>30</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Verify Inputs</string>
        </property>
       </widget>
      </widget>
