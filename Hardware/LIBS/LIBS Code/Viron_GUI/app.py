@@ -33,9 +33,6 @@ class Window(QMainWindow, Ui_MainWindow):
         self.viron_connected = False
         
         
-
-        
-        
         # ------------------------------------------------------------------------------------------
         # dg645 stuff: 
         # init lists for easier access
@@ -91,6 +88,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.viron_autofire_button.clicked.connect(self.toggle_autofire)
         # single shot button
         self.viron_singlefire_button.clicked.connect(self.toggle_singlefire)
+        # external fire button
+        self.viron_external_fire_button.clicked.connect(self.toggle_external_fire)
         # set rep rate
         self.viron_set_reprate_button.clicked.connect(self.handle_set_rep_rate)
         # set qs delay
@@ -795,10 +794,10 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_autofire_button.setChecked(False)
             self.viron_stop_button.setChecked(False)
             self.viron_singlefire_button.setChecked(False)
-            self.viron_singlefire_button.setStyleSheet("background-color : darkgrey")
+            self.viron_singlefire_button.setStyleSheet("background-color : black")
             self.viron_standby_button.setStyleSheet("background-color : darkgreen")
-            self.viron_stop_button.setStyleSheet("background-color : darkgrey")
-            self.viron_autofire_button.setStyleSheet("background-color : darkgrey")
+            self.viron_stop_button.setStyleSheet("background-color : black")
+            self.viron_autofire_button.setStyleSheet("background-color : black")
             return True
         print("Failed to set laser to standby")
         return False
@@ -821,10 +820,10 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_standby_button.setChecked(False)
             self.viron_autofire_button.setChecked(False)
             self.viron_singlefire_button.setChecked(False)
-            self.viron_singlefire_button.setStyleSheet("background-color : darkgrey")
-            self.viron_standby_button.setStyleSheet("background-color : darkgrey")
+            self.viron_singlefire_button.setStyleSheet("background-color : black")
+            self.viron_standby_button.setStyleSheet("background-color : black")
             self.viron_stop_button.setStyleSheet("background-color : darkgreen")
-            self.viron_autofire_button.setStyleSheet("background-color : darkgrey")
+            self.viron_autofire_button.setStyleSheet("background-color : black")
             return True
         else:
             print("failed to set stop")
@@ -852,9 +851,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.viron_standby_button.setChecked(False)
         self.viron_stop_button.setChecked(False)
         self.viron_singlefire_button.setChecked(False)
-        self.viron_singlefire_button.setStyleSheet("background-color : darkgrey")
-        self.viron_standby_button.setStyleSheet("background-color : darkgrey")
-        self.viron_stop_button.setStyleSheet("background-color : darkgrey")
+        self.viron_singlefire_button.setStyleSheet("background-color : black")
+        self.viron_standby_button.setStyleSheet("background-color : black")
+        self.viron_stop_button.setStyleSheet("background-color : black")
         self.viron_autofire_button.setStyleSheet("background-color : red")
 
     def toggle_singlefire(self):
@@ -875,15 +874,27 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_standby_button.setChecked(False)
             self.viron_stop_button.setChecked(False)
             self.viron_autofire_button.setChecked(False)
-            self.viron_standby_button.setStyleSheet("background-color : darkgrey")
-            self.viron_stop_button.setStyleSheet("background-color : darkgrey")
-            self.viron_autofire_button.setStyleSheet("background-color : darkgrey")
+            self.viron_standby_button.setStyleSheet("background-color : black")
+            self.viron_stop_button.setStyleSheet("background-color : black")
+            self.viron_autofire_button.setStyleSheet("background-color : black")
             self.viron_singlefire_button.setStyleSheet("background-color : red")
             
         if self.laser.fire_single_shot():
             print("fired mah lazor")  
             
-            
+    def toggle_external_fire(self):
+        if self.laser.set_external_trigger():
+            self.viron_external_trigger_button.setStyleSheet("background-color : darkgreen")
+            self.viron_standby_button.setStyleSheet("background-color : black")
+            self.viron_stop_button.setStyleSheet("background-color : black")
+            self.viron_autofire_button.setStyleSheet("background-color : black")  
+            self.viron_singlefire_button.setStyleSheet("background-color : black")
+            return True
+        else:
+            print("failed to set external trigger")
+            return False      
+        
+           
     def handle_set_rep_rate(self):
         """
         Handles the action when the "Set Rep Rate" button is clicked.

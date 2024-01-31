@@ -70,7 +70,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>6</number>
     </property>
     <widget class="QWidget" name="delay_generator_tab">
      <attribute name="title">
@@ -2992,7 +2992,7 @@
           <x>260</x>
           <y>100</y>
           <width>571</width>
-          <height>51</height>
+          <height>54</height>
          </rect>
         </property>
         <layout class="QGridLayout" name="gridLayout_4">
@@ -3010,13 +3010,6 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="2">
-          <widget class="QPushButton" name="viron_autofire_button">
-           <property name="text">
-            <string>Auto Fire</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="0">
           <widget class="QPushButton" name="viron_standby_button">
            <property name="text">
@@ -3024,7 +3017,21 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="0" colspan="4">
+         <item row="1" column="2">
+          <widget class="QPushButton" name="viron_autofire_button">
+           <property name="text">
+            <string>Auto Fire</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="4">
+          <widget class="QPushButton" name="viron_external_fire_button">
+           <property name="text">
+            <string>External Fire</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="5">
           <widget class="QPushButton" name="viron_connect_button">
            <property name="text">
             <string>Connect</string>

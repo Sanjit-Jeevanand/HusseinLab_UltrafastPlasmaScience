@@ -253,7 +253,20 @@ class VironLaser():
             return False
         return True
         
-        
+    def set_external_trigger(self):
+        """
+        Sets the Viron laser to external trigger mode.
+        """
+        # set trigger to external on diode and QS
+        if not self.send_command("$TRIG EI"):
+            return False
+        # set QS 
+        if not self.send_command("$QSON 2"):
+            return False
+        if not self.send_command("$QSBLANK 0"):
+            return False
+        return True
+       
     def fire_single_shot(self):
         """
         Fires a single shot from the Viron laser.
