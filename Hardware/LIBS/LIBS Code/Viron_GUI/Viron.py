@@ -261,7 +261,7 @@ class VironLaser():
         if not self.send_command("$TRIG EI"):
             return False
         # set QS 
-        if not self.send_command("$QSON 2"):
+        if not self.send_command("$QSON 1"):
             return False
         if not self.send_command("$QSBLANK 0"):
             return False

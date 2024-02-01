@@ -802,6 +802,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_standby_button.setStyleSheet("background-color : darkgreen")
             self.viron_stop_button.setStyleSheet("background-color : black")
             self.viron_autofire_button.setStyleSheet("background-color : black")
+            self.viron_external_fire_button.setStyleSheet("background-color : black")
             return True
         print("Failed to set laser to standby")
         return False
@@ -828,6 +829,8 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_standby_button.setStyleSheet("background-color : black")
             self.viron_stop_button.setStyleSheet("background-color : darkgreen")
             self.viron_autofire_button.setStyleSheet("background-color : black")
+            self.viron_external_fire_button.setStyleSheet("background-color : black")
+
             return True
         else:
             print("failed to set stop")
@@ -859,6 +862,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.viron_standby_button.setStyleSheet("background-color : black")
         self.viron_stop_button.setStyleSheet("background-color : black")
         self.viron_autofire_button.setStyleSheet("background-color : red")
+        self.viron_external_fire_button.setStyleSheet("background-color : black")
+
 
     def toggle_singlefire(self):
         """
@@ -882,13 +887,14 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_stop_button.setStyleSheet("background-color : black")
             self.viron_autofire_button.setStyleSheet("background-color : black")
             self.viron_singlefire_button.setStyleSheet("background-color : red")
-            
+            self.viron_external_fire_button.setStyleSheet("background-color : black")
+
         if self.laser.fire_single_shot():
             print("fired mah lazor")  
             
     def toggle_external_fire(self):
         if self.laser.set_external_trigger():
-            self.viron_external_trigger_button.setStyleSheet("background-color : darkgreen")
+            self.viron_external_fire_button.setStyleSheet("background-color : darkgreen")
             self.viron_standby_button.setStyleSheet("background-color : black")
             self.viron_stop_button.setStyleSheet("background-color : black")
             self.viron_autofire_button.setStyleSheet("background-color : black")  
