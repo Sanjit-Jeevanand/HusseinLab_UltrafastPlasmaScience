@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1120, 860)
+        MainWindow.resize(1111, 860)
         MainWindow.setAutoFillBackground(False)
         MainWindow.setTabShape(QtWidgets.QTabWidget.Rounded)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -574,6 +574,12 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.delay_generator_tab, "")
         self.Spectrometer_tab = QtWidgets.QWidget()
         self.Spectrometer_tab.setObjectName("Spectrometer_tab")
+        self.spectra_plot_1 = PlotWidget(self.Spectrometer_tab)
+        self.spectra_plot_1.setEnabled(True)
+        self.spectra_plot_1.setGeometry(QtCore.QRect(20, 20, 1051, 451))
+        self.spectra_plot_1.setMinimumSize(QtCore.QSize(200, 100))
+        self.spectra_plot_1.setMaximumSize(QtCore.QSize(3500, 7000))
+        self.spectra_plot_1.setObjectName("spectra_plot_1")
         self.tabWidget.addTab(self.Spectrometer_tab, "")
         self.spectra_plots_tab = QtWidgets.QWidget()
         self.spectra_plots_tab.setObjectName("spectra_plots_tab")
@@ -1214,7 +1220,7 @@ class Ui_MainWindow(object):
         self.kill_button.setObjectName("kill_button")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1120, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1111, 21))
         self.menubar.setObjectName("menubar")
         self.menuViron_UI = QtWidgets.QMenu(self.menubar)
         self.menuViron_UI.setObjectName("menuViron_UI")
@@ -1236,7 +1242,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(6)
+        self.tabWidget.setCurrentIndex(1)
         self.tabWidget_2.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 

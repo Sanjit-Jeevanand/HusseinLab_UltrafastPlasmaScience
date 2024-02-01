@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1120</width>
+    <width>1111</width>
     <height>860</height>
    </rect>
   </property>
@@ -70,7 +70,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>6</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="delay_generator_tab">
      <attribute name="title">
@@ -1663,6 +1663,31 @@
      <attribute name="title">
       <string>Spectrometer</string>
      </attribute>
+     <widget class="PlotWidget" name="spectra_plot_1" native="true">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>1051</width>
+        <height>451</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>100</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>3500</width>
+        <height>7000</height>
+       </size>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="spectra_plots_tab">
      <attribute name="title">
@@ -3352,7 +3377,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1120</width>
+     <width>1111</width>
      <height>21</height>
     </rect>
    </property>

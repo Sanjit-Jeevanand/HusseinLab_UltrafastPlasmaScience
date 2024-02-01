@@ -30,13 +30,21 @@ class Window(QMainWindow, Ui_MainWindow):
         self.is_dg645_connected = False
         self.is_scope_connected = False
         self.is_xps_connected = False
-        self.viron_connected = False
+        self.is_viron_connected = False
         self.are_specs_connected = False
         
-        
+        # ------------------------------------------------------------------------------------------
+        # Spectrometer Plot
+        self.spectra_plot_1.setLabel(axis='left', text='Intensity (a.u)')
+        self.spectra_plot_1.setLabel(axis='bottom', text='Wavelength (nm)')
+        self.spectra_plot_1.showAxis('right')
+        self.spectra_plot_1.showAxis('top')
+        self.spectra_plot_1.getAxis('top').setStyle(showValues=False)
+        self.spectra_plot_1.getAxis('right').setStyle(showValues=False)
         # ------------------------------------------------------------------------------------------
         # bottom buttons
         self.fire_button.clicked.connect(self.fire_laser_single)
+        
         # ------------------------------------------------------------------------------------------
         # dg645 stuff: 
         # init lists for easier access
@@ -584,7 +592,7 @@ class Window(QMainWindow, Ui_MainWindow):
             return False
 
         else:
-            self.viron_connected = False
+            self.is_viron_connected = False
             self.currentstate = None
             self.states = ['standby', 'stop', 'fire', 'single_shot']
             self.tngui_box.addWidget(self.tngui)
@@ -604,7 +612,7 @@ class Window(QMainWindow, Ui_MainWindow):
             None
         """
         if status_hex is None:
-            if self.viron_connected:
+            if self.is_viron_connected:
                 status_hex = self.laser.get_status()
             else:
                 return
@@ -613,7 +621,7 @@ class Window(QMainWindow, Ui_MainWindow):
             
         self.display_status(status)
         self.display_critical_info(status)
-        if self.viron_connected:
+        if self.is_viron_connected:
             self._get_values()
         
     def _get_values(self):
@@ -726,7 +734,7 @@ class Window(QMainWindow, Ui_MainWindow):
         status_text += f"  Remote interlock: {status['Remote Interlock Laser']}\n"
         status_text += f"  System Interlock: {status['System Interlock System/TEC Temp/Sys OK']}\n"
         status_text += f"  Laser Node Interlock: {status['System Interlock Laser Node']}\n"
-        if self.viron_connected:
+        if self.is_viron_connected:
             temps = self.laser.get_temps()
             status_text += "Temperatures:\n"
             status_text += f"  Laser Temp: {temps['Laser Temp']} C\n"
@@ -775,13 +783,13 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_isconnected_label.setText("Connected")
             self.viron_isconnected_label.setStyleSheet("color: green")
             self.status_timer.start()
-            self.viron_connected = True
+            self.is_viron_connected = True
 
         else:
             self.viron_connect_button.setStyleSheet("background-color: red")
             self.viron_isconnected_label.setText("Not Connected")
             self.viron_isconnected_label.setStyleSheet("color: red")
-            self.viron_connected = False
+            self.is_viron_connected = False
 
     def toggle_standby(self):
         """
@@ -938,25 +946,51 @@ class Window(QMainWindow, Ui_MainWindow):
                 print('Q-Switch Pre Set to ', delay)
                 return True
         return False
+    
+    
+    
+    '''
+          ____  ____  _____ ____ ____  
+         / ___||  _ \| ____/ ___/ ___| 
+         \___ \| |_) |  _|| |   \___ \ 
+          ___) |  __/| |__| |___ ___) |
+         |____/|_|   |_____\____|____/ 
+     _____________________________________________________________________________                          
+    '''
+    
+    def init_spectrometers(self):
+        pass
+    
+    def arm_spectrometers(self):
+        pass
+    
+    def join_spectrometers(self):
+        pass
+    
+     
+     
+    '''_______________________________________________________________________________________________________'''
      
      
     def fire_laser_single(self):
         if self.are_specs_connected:
-            # arm spectrometers
+            self.arm_spectrometers()
             pass
         
-        if self.viron_connected:
+        if self.is_viron_connected:
             self.fire()
             
         if self.are_specs_connected:
             # join spectrometers
+            self.join_spectrometers()
             # process data in separate thread
             pass
         
             
     def fire(self):
         self.dg645.sendcmd('*TRG') 
-                
+         
+
     def _update_clock(self):
         current_date_time = QDate.currentDate().toString() + ' ' + QTime.currentTime().toString()
         self.clock_label.setText(current_date_time)
