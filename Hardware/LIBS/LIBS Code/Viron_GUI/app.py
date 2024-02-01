@@ -580,9 +580,9 @@ class Window(QMainWindow, Ui_MainWindow):
         _________________________________________________________________________________________________'''
         
     def _init_viron(self):
-        self.host = "192.168.103.103"
-        self.port = 23
-        self.password = "VR6BE4EE"
+        self.host = self.host_entry.text()
+        self.port = self.port_entry.text()
+        self.password = self.password_entry.text()
         try:
             self.tngui = TelnetSessionGUI()
             self.laser = VironLaser(self.host, self.port, self.password, telnetgui=self.tngui)

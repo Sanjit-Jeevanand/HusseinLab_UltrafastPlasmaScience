@@ -1242,7 +1242,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(6)
         self.tabWidget_2.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -1557,7 +1557,7 @@ class Ui_MainWindow(object):
         self.host_label.setText(_translate("MainWindow", "Host:"))
         self.port_label.setText(_translate("MainWindow", "Port:"))
         self.password_label.setText(_translate("MainWindow", "Password:"))
-        self.host_entry.setText(_translate("MainWindow", "192.168.103.103"))
+        self.host_entry.setText(_translate("MainWindow", "192.168.0.154"))
         self.port_entry.setText(_translate("MainWindow", "23"))
         self.password_entry.setText(_translate("MainWindow", "VR6BE4EE"))
         self.viron_stop_button.setText(_translate("MainWindow", "Stop"))

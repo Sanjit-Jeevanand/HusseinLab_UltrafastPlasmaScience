@@ -70,7 +70,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>6</number>
     </property>
     <widget class="QWidget" name="delay_generator_tab">
      <attribute name="title">
@@ -2991,7 +2991,7 @@
          <item row="0" column="1">
           <widget class="QLineEdit" name="host_entry">
            <property name="text">
-            <string>192.168.103.103</string>
+            <string>192.168.0.154</string>
            </property>
           </widget>
          </item>
