@@ -109,6 +109,7 @@ class Window(QMainWindow, Ui_MainWindow):
         # set qs pre
         self.viron_qspre_set_button.clicked.connect(self.handle_set_qs_pre)
         # init statuses
+        self.laser_simple_status = {"isReady" : 'Disconnected'}
         self.handle_get_status(status_hex="0x000000000000")
         # ----------------------------------------------------------------------------------------------
         
@@ -717,14 +718,15 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
         # warming / rtf / fault
-        if binary_string[16:47] == str('0'*32):
-            status['isReady'] = 'Ready'
-        elif binary_string[16:47] == str('0'*24 + '0000100'):
-            status['isReady'] = 'Warming'
+        print(binary_string[16:47])
+        if binary_string[16:47] == str('0'*31):
+            self.laser_simple_status['isReady'] = 'Ready'
+        elif binary_string[16:47] == str('0'*23 + '10000100') or str('0'*23 + '00000100'):
+            self.laser_simple_status['isReady'] = 'Warming'
         else:
-            status['isReady'] = 'Fault'        
+            self.laser_simple_status['isReady'] = 'Fault'        
         
-        return status
+        return status 
     
 
     def display_critical_info(self, status):
@@ -749,7 +751,7 @@ class Window(QMainWindow, Ui_MainWindow):
             status_text += f"  Laser Temp: {temps['Laser Temp']} C\n"
             status_text += f"  Diode Temp: {temps['Diode Temp']} C\n"
         self.critical_status_label.setText(status_text)
-        self.laser_status_label.setText(status['isReady'])
+        self.laser_status_label.setText(self.laser_simple_status['isReady'])
         
         
     def display_status(self, status):
