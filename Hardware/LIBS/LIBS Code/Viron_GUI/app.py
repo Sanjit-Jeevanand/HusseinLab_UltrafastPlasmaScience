@@ -715,6 +715,15 @@ class Window(QMainWindow, Ui_MainWindow):
         status['NLO Oven 1 over temp, oven 1 off'] = 'OK' if binary_string[46] == '0' else 'Warning'
         status['NLO Oven 1 open sensor, oven 1 off'] = 'OK' if binary_string[47] == '0' else 'Warning'
 
+
+        # warming / rtf / fault
+        if binary_string[16:47] == str('0'*32):
+            status['isReady'] = 'Ready'
+        elif binary_string[16:47] == str('0'*24 + '0000100'):
+            status['isReady'] = 'Warming'
+        else:
+            status['isReady'] = 'Fault'        
+        
         return status
     
 
@@ -740,6 +749,7 @@ class Window(QMainWindow, Ui_MainWindow):
             status_text += f"  Laser Temp: {temps['Laser Temp']} C\n"
             status_text += f"  Diode Temp: {temps['Diode Temp']} C\n"
         self.critical_status_label.setText(status_text)
+        self.laser_status_label.setText(status['isReady'])
         
         
     def display_status(self, status):
@@ -789,6 +799,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.viron_connect_button.setStyleSheet("background-color: red")
             self.viron_isconnected_label.setText("Not Connected")
             self.viron_isconnected_label.setStyleSheet("color: red")
+            self.laser_status_label.setText('Disconnected')
             self.is_viron_connected = False
 
     def toggle_standby(self):

@@ -3183,6 +3183,24 @@
          <bool>true</bool>
         </property>
        </widget>
+       <widget class="QLabel" name="laser_status_label">
+        <property name="geometry">
+         <rect>
+          <x>570</x>
+          <y>260</y>
+          <width>151</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Disconnected</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="status_tab">
        <attribute name="title">
