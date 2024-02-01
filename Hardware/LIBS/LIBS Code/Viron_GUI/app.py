@@ -718,7 +718,6 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
         # warming / rtf / fault
-        print(binary_string[16:47])
         if binary_string[16:47] == str('0'*31):
             self.laser_simple_status['isReady'] = 'Ready'
         elif binary_string[16:47] == str('0'*23 + '10000100') or str('0'*23 + '00000100'):
