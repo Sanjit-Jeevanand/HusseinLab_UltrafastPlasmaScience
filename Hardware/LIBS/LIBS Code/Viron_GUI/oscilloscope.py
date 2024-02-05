@@ -31,8 +31,9 @@ class scope:
         self.scope.write('ACQuire:STATE ON')   # Start acquisition
         self.scope.query('*OPC?')   # Wait for acquisition to complete
         # Read the acquired data
-        self.scope.write('CURVE?')   # Query the waveform data
-        data = self.scope.read_raw()   # Read the raw binary data
+        # self.scope.write('CURV?')   # Query the waveform data
+        # data = self.scope.read_raw()   # Read the raw binary data
+        data = self.scope.query_binary_values('CURV?', datatype='B', is_big_endian=True)
         return data
         
     def handle_data(self, data):
