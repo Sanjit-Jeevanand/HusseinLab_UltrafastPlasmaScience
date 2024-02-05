@@ -1248,7 +1248,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(6)
+        self.tabWidget.setCurrentIndex(5)
         self.tabWidget_2.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -1556,6 +1556,9 @@ class Ui_MainWindow(object):
         self.background_spectra_label.setText(_translate("MainWindow", "Background Spectra Present (y/N)"))
         self.label_12.setText(_translate("MainWindow", "Additional Information"))
         self.energy_label.setText(_translate("MainWindow", "Laser Energy (mJ)"))
+        self.wavelength_entry.setText(_translate("MainWindow", "532"))
+        self.pulse_duration_entry.setText(_translate("MainWindow", "6.27"))
+        self.focal_length_entry.setText(_translate("MainWindow", "250"))
         self.background_spectra_present_select.setItemText(0, _translate("MainWindow", "No"))
         self.background_spectra_present_select.setItemText(1, _translate("MainWindow", "Yes"))
         self.pushButton_2.setText(_translate("MainWindow", "Update Parameters"))

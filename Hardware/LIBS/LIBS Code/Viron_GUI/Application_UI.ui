@@ -70,7 +70,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>6</number>
+     <number>5</number>
     </property>
     <widget class="QWidget" name="delay_generator_tab">
      <attribute name="title">
@@ -2887,16 +2887,28 @@
         <widget class="QLineEdit" name="laser_energy_entry"/>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="wavelength_entry"/>
+        <widget class="QLineEdit" name="wavelength_entry">
+         <property name="text">
+          <string>532</string>
+         </property>
+        </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="pulse_duration_entry"/>
+        <widget class="QLineEdit" name="pulse_duration_entry">
+         <property name="text">
+          <string>6.27</string>
+         </property>
+        </widget>
        </item>
        <item row="3" column="1">
         <widget class="QLineEdit" name="sample_id_entry"/>
        </item>
        <item row="4" column="1">
-        <widget class="QLineEdit" name="focal_length_entry"/>
+        <widget class="QLineEdit" name="focal_length_entry">
+         <property name="text">
+          <string>250</string>
+         </property>
+        </widget>
        </item>
        <item row="5" column="1">
         <widget class="QLineEdit" name="integration_time_entry"/>
