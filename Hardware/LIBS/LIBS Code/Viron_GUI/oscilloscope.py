@@ -31,9 +31,12 @@ class scope:
         self.scope.write('ACQuire:STATE ON')   # Start acquisition
         self.scope.query('*OPC?')   # Wait for acquisition to complete
         # Read the acquired data
-        # self.scope.write('CURV?')   # Query the waveform data
+        # self.scope.write('CURVE?')   # Query the waveform data
         # data = self.scope.read_raw()   # Read the raw binary data
-        data = self.scope.query_binary_values('CURV?', datatype='B', is_big_endian=True)
+        # data = self.scope.read_bytes(1)
+        data = self.scope.query_binary_values('CURVE?', datatype='B', is_big_endian=True)
+        print(data)
+
         return data
         
     def handle_data(self, data):
@@ -49,12 +52,13 @@ class scope:
         Volts_wave = Volts_wave - np.mean(Volts_wave)
         
         # Extract the x-axis data
-        xzero = float(scope.query('WFMPre:XZEro?'))
+        xzero = float(self.scope.query('WFMPre:XZEro?'))
         Time_wave = np.arange(len(Volts_wave)) * self.xincr + xzero
         
         # Time_wave = np.arange(0, xincr * len(Volts_wave), xincr)   # Generate the time axis
         # Time_wave = np.linspace(0, xincr * len(Volts_wave), len(Volts_wave))   # Generate the time axis
         data_oci = np.array([Time_wave, Volts_wave])
+        print(data_oci)
         data_oci = data_oci.T
         
         return data_oci
