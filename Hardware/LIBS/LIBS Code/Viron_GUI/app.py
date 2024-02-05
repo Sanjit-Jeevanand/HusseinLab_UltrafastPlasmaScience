@@ -14,7 +14,7 @@ from pyqtgraph import PlotWidget
 from telnetGUI import TelnetSessionGUI
 from Viron import VironLaser
 from XPS import XPS, XPSnotFound
-
+import threading
 
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -74,6 +74,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.scope_datasource_select.currentIndexChanged.connect(lambda: self._scope_set_data_source(self.scope_datasource_select.currentText()))
         self.scope_triggersource_select.currentIndexChanged.connect(lambda: self._scope_set_trigger_source(self.scope_triggersource_select.currentText()))
         self.set_scope_params_button.clicked.connect(self._scope_set_all_params)
+        self._init_scope_plot()
         '''
         # self.data_source_line.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
         self.data_source_line.textChanged.connect(lambda: self.ocilloscope_inp('data_source'))
@@ -568,6 +569,19 @@ class Window(QMainWindow, Ui_MainWindow):
         else:
             QMessageBox.critical(self, 'Error', 'Error: Invalid scope parameters')
 
+    def _init_scope_plot(self):
+        self.scope_graph.setLabel(axis='left', text='Voltage (V)')
+        self.scope_graph.setLabel(axis='bottom', text='Time (s)')
+        self.scope_graph.showAxis('right')
+        self.scope_graph.showAxis('top')
+        self.scope_graph.getAxis('top').setStyle(showValues=False)
+        self.scope_graph.getAxis('right').setStyle(showValues=False)
+        
+    def _update_scope_plot(self, data):
+        plot_data = self.scope.handle_data(data)
+        self.scope_graph.plot(plot_data[0], plot_data[1])
+        return
+    
     '''_______________________________________________________________________________________________________'''
     
     
@@ -988,7 +1002,9 @@ class Window(QMainWindow, Ui_MainWindow):
         if self.are_specs_connected:
             self.arm_spectrometers()
             pass
-        
+        if self.is_scope_connected:
+            scopethread = threading.Thread(target=self.scope.wait_for_trigger_and_get_data)
+            scopethread.start()
         if self.is_viron_connected:
             self.fire()
             
@@ -997,7 +1013,13 @@ class Window(QMainWindow, Ui_MainWindow):
             self.join_spectrometers()
             # process data in separate thread
             pass
+        if self.is_scope_connected:
+            scopedata = scopethread.join()
+            # asynchronusly update the scope plot
+            threading.Thread(target=self._update_scope_plot, args=(scopedata,)).start()
         
+        
+        # need to save data here too
             
     def fire(self):
         self.dg645.sendcmd('*TRG') 
@@ -1015,7 +1037,8 @@ class Window(QMainWindow, Ui_MainWindow):
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    qdarktheme.setup_theme()
+    app.setStyleSheet(qdarktheme.load_stylesheet())
+    # qdarktheme.setup_theme()
     win = Window()
     win.show()
     sys.exit(app.exec())

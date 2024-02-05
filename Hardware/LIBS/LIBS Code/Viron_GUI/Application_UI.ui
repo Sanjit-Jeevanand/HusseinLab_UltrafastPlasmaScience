@@ -70,7 +70,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>5</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="delay_generator_tab">
      <attribute name="title">
@@ -2785,7 +2785,7 @@
         <x>290</x>
         <y>0</y>
         <width>831</width>
-        <height>451</height>
+        <height>491</height>
        </rect>
       </property>
      </widget>
