@@ -24,13 +24,13 @@ import quantities as pq
       
 
 #importing resources for stellerNet
-import time, logging
+import time # logging
 import numpy as np
 # import the usb driver
 # import stellarnet_driver3 as sn
 import stellarnet_driver3 as sn
 import matplotlib.pyplot as plt
-logging.basicConfig(format='%(asctime)s %(message)s')
+# logging.basicConfig(format='%(asctime)s %(message)s')
 
 def wavelengthCalibration(coeffs):
     pixels = np.arange(2048)#.reshape(-1, 1)
@@ -48,6 +48,15 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(qtcreator_file)
 
 # Connect Delay Generator
 ins = ik.srs.SRSDG645.open_serial('COM4', 9600) # dg645
+
+# -------------------------------
+# set external falling trigger, single shot mode
+# ins.sendcmd("TSRC 4")
+# set 2V TTL threshold
+# ins.sendcmd("TLVL 2")
+# query status register to clear any abberant bits
+# _ = ins.query("INSR?")
+# -------------------------------
 
 # Connect Spectrometers 
 #These spectrometer IDs are device specific and don't change
@@ -86,9 +95,6 @@ smooth = 1
 # Connect to the oscilloscope
 rm = visa.ResourceManager()
 scope = rm.open_resource('USB0::0x0699::0x03C7::C020817::INSTR')
-
-
-
 
 #Global variables for data saving and plotting
 data_stellar0 = None # wavelength and intensity for stellerNet
@@ -195,9 +201,8 @@ class ocilloscopeThread(threading.Thread):
         # self.start = start
         global data_oci
         data_oci=self.ocilloscope(data_source, trig_source, v_div, t_div, rec_length)
-        
     def ocilloscope(self, data_source, trig_source, v_div, t_div, rec_length):
-        # # Set up acquisition parameters
+        # Set up acquisition parameters
         scope.write('DATa:SOUrce '+ data_source)   # Select channel 4 as data source
         scope.write('DATa:ENCdg RIBinary')   # Set binary data encoding
         scope.write('WFMPre:XINcr?')   # Query the x-axis increment
@@ -214,8 +219,8 @@ class ocilloscopeThread(threading.Thread):
         scope.write('HOR:SCALE '+ t_div) # Set the horizontal scale to 1ms/div
         
         # Arm the scope and wait for trigger
-        # scope.write('ACQuire:STOPAfter SEQuence')   # Stop acquisition after one sequence
-        # scope.write('ACQuire:STATE ON')   # Start acquisition
+        scope.write('ACQuire:STOPAfter SEQuence')   # Stop acquisition after one sequence
+        scope.write('ACQuire:STATE ON')   # Start acquisition
         scope.query('*OPC?')   # Wait for acquisition to complete
 
         # Read the acquired data
@@ -248,9 +253,16 @@ class FireThread(threading.Thread):
     def __init__(self, clicked):
         super(FireThread, self).__init__()
         self.clicked = clicked
-        ins.sendcmd('TSRC 5') 
+        # ins.sendcmd('TSRC 5') 
+        # ins.sendcmd('*TRG')
         ins.sendcmd('*TRG')
-
+        # --------------------------------------------------------------------
+        insr = int(ins.query("INSR?"))
+        while not insr & 0b1:
+            insr = int(ins.query("INSR?"))
+            time.sleep(0.05)
+        # at this point the laser has fired and we can continue
+        # --------------------------------------------------------------------
 
 # Main class for GUI
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -355,7 +367,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         
         # self.Time_data = 0
         # self.Volts_data=0
-        
 
 
 
@@ -397,26 +408,26 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.plot_graph_7.getAxis('top').setStyle(showValues=False)
         self.plot_graph_7.getAxis('right').setStyle(showValues=False)
         
-        self.plot_graph_8.setLabel(axis='left', text='Intensity (a.u)')
-        self.plot_graph_8.setLabel(axis='bottom', text='Wavelength (nm)')
-        self.plot_graph_8.showAxis('right')
-        self.plot_graph_8.showAxis('top')
-        self.plot_graph_8.getAxis('top').setStyle(showValues=False)
-        self.plot_graph_8.getAxis('right').setStyle(showValues=False)
+        # self.plot_graph_8.setLabel(axis='left', text='Intensity (a.u)')
+        # self.plot_graph_8.setLabel(axis='bottom', text='Wavelength (nm)')
+        # self.plot_graph_8.showAxis('right')
+        # self.plot_graph_8.showAxis('top')
+        # self.plot_graph_8.getAxis('top').setStyle(showValues=False)
+        # self.plot_graph_8.getAxis('right').setStyle(showValues=False)
         
-        self.plot_graph_9.setLabel(axis='left', text='Intensity (a.u)')
-        self.plot_graph_9.setLabel(axis='bottom', text='Wavelength (nm)')
-        self.plot_graph_9.showAxis('right')
-        self.plot_graph_9.showAxis('top')
-        self.plot_graph_9.getAxis('top').setStyle(showValues=False)
-        self.plot_graph_9.getAxis('right').setStyle(showValues=False)
+        # self.plot_graph_9.setLabel(axis='left', text='Intensity (a.u)')
+        # self.plot_graph_9.setLabel(axis='bottom', text='Wavelength (nm)')
+        # self.plot_graph_9.showAxis('right')
+        # self.plot_graph_9.showAxis('top')
+        # self.plot_graph_9.getAxis('top').setStyle(showValues=False)
+        # self.plot_graph_9.getAxis('right').setStyle(showValues=False)
         
-        self.plot_graph_10.setLabel(axis='left', text='Voltage (V)')
-        self.plot_graph_10.setLabel(axis='bottom', text='Time (s)')
-        self.plot_graph_10.showAxis('right')
-        self.plot_graph_10.showAxis('top')
-        self.plot_graph_10.getAxis('top').setStyle(showValues=False)
-        self.plot_graph_10.getAxis('right').setStyle(showValues=False)
+        # self.plot_graph_10.setLabel(axis='left', text='Voltage (V)')
+        # self.plot_graph_10.setLabel(axis='bottom', text='Time (s)')
+        # self.plot_graph_10.showAxis('right')
+        # self.plot_graph_10.showAxis('top')
+        # self.plot_graph_10.getAxis('top').setStyle(showValues=False)
+        # self.plot_graph_10.getAxis('right').setStyle(showValues=False)
 
         
         self.read_json()
@@ -571,9 +582,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         '''
         dir_path=QtWidgets.QFileDialog.getExistingDirectory(self,"Choose Directory","./")  # Change the 3rd parameter ("./") to change directory that browser opens in.
         self.SaveData_dir.setText(dir_path)
-        
+    
     def MySpectrometers(self):
-        start_time = time.time()
+        st = time.time()
+        self._MySpectrometers()
+        print("MySpectrometers took ", str(time.time() - st))
+        
+    def _MySpectrometers(self):
+        st = time.time()
         # Calling hardware threads   
         StellerNet0TrigThread = threading.Thread(target=StellerNet0TriggerThread, args=(self.inttime, ))
         StellerNet1TrigThread = threading.Thread(target=StellerNet1TriggerThread, args=(self.inttime, ))
@@ -581,22 +597,31 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         StellerNet3TrigThread = threading.Thread(target=StellerNet3TriggerThread, args=(self.inttime, ))
         StellerNet4TrigThread = threading.Thread(target=StellerNet4TriggerThread, args=(self.inttime, ))
         StellerNet5TrigThread = threading.Thread(target=StellerNet5TriggerThread, args=(self.inttime, ))
-        ocilloscopeTrigThread = threading.Thread(target=ocilloscopeThread, args=(self.data_source,self.trig_source,self.v_div, self.t_div, self.rec_length))
-        Fire = threading.Thread(target=FireThread, args=(10, ))
+        # ocilloscopeTrigThread = threading.Thread(target=ocilloscopeThread, args=(self.data_source,self.trig_source,self.v_div, self.t_div, self.rec_length))
+        # Fire = threading.Thread(target=FireThread, args=(10, ))
 
         # Start Parallel Operation of hardwares
         # ThorlabsTrigThread.start()
+        
+        # Fire.start()
+        
+        
         StellerNet0TrigThread.start()
         StellerNet1TrigThread.start()
         StellerNet2TrigThread.start()
         StellerNet3TrigThread.start()
         StellerNet4TrigThread.start()
         StellerNet5TrigThread.start()
-        ocilloscopeTrigThread.start()
-        time.sleep(0.1)
-        Fire.start()
+        print("time taken to arm spectrometers: ", str(time.time() - st))
+        # ocilloscopeTrigThread.start()   # this is causing a crash as it times out
+
+        
+
         # data_oci = np.array(self.Time_data, self.Volts_data)
         
+
+        # Fire.join()
+        # should only proceed past here once the laser has fired
         # ThorlabsTrigThread.join()
         StellerNet0TrigThread.join()
         StellerNet1TrigThread.join()
@@ -604,9 +629,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         StellerNet3TrigThread.join()
         StellerNet4TrigThread.join()
         StellerNet5TrigThread.join()
-        ocilloscopeTrigThread.join()
-        Fire.join()     
+        
+        # ocilloscopeTrigThread.join()
+        # time.sleep(0.1)
 
+     
+
+
+        st = time.time()
         
         # calling variables for sending data from thread
         # global data_thor
@@ -616,7 +646,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         global data_stellar3
         global data_stellar4
         global data_stellar5        
-        global data_oci
+        # global data_oci
 
         global intensity_steller0_all
         global intensity_steller1_all
@@ -653,7 +683,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         data_stellar4 = data_stellar4.T
         data_stellar5 = data_stellar5.T
         
-        # print(data_stellar0.shape)
+        print(data_stellar0.shape)
         
 
         temp_steller0 = data_stellar0[:,1].reshape(2048,1)
@@ -668,7 +698,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         intensity_steller4_all = np.hstack([intensity_steller4_all, temp_steller4])
         temp_steller5 = data_stellar5[:,1].reshape(2048,1)
         intensity_steller5_all = np.hstack([intensity_steller5_all, temp_steller5])
-        
+
         #plotting
         if self.acquire_bkg.isChecked():
             data_stellar0_bkg = np.hstack([data_stellar0_bkg, data_stellar0[:,1].reshape(2048,1)])
@@ -697,21 +727,21 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.plot_graph_7.plot(wav4,intensity_steller4_all[:,-1], pen='m')
                 self.plot_graph_7.plot(wav5,intensity_steller5_all[:,-1], pen='r')
         
-                self.plot_graph_8.clear()
-                self.plot_graph_8.plot(wav0,intensity_steller0_all[:,-2], pen='k')
-                self.plot_graph_8.plot(wav1,intensity_steller1_all[:,-2], pen='c')
-                self.plot_graph_8.plot(wav2,intensity_steller2_all[:,-2], pen='b')
-                self.plot_graph_8.plot(wav3,intensity_steller3_all[:,-2], pen='g')
-                self.plot_graph_8.plot(wav4,intensity_steller4_all[:,-2], pen='m')
-                self.plot_graph_8.plot(wav5,intensity_steller5_all[:,-2], pen='r')
+                # self.plot_graph_8.clear()
+                # self.plot_graph_8.plot(wav0,intensity_steller0_all[:,-2], pen='k')
+                # self.plot_graph_8.plot(wav1,intensity_steller1_all[:,-2], pen='c')
+                # self.plot_graph_8.plot(wav2,intensity_steller2_all[:,-2], pen='b')
+                # self.plot_graph_8.plot(wav3,intensity_steller3_all[:,-2], pen='g')
+                # self.plot_graph_8.plot(wav4,intensity_steller4_all[:,-2], pen='m')
+                # self.plot_graph_8.plot(wav5,intensity_steller5_all[:,-2], pen='r')
         
-                self.plot_graph_9.clear()
-                self.plot_graph_9.plot(wav0,intensity_steller0_all[:,-3], pen='k')
-                self.plot_graph_9.plot(wav1,intensity_steller1_all[:,-3], pen='c')
-                self.plot_graph_9.plot(wav2,intensity_steller2_all[:,-3], pen='b')
-                self.plot_graph_9.plot(wav3,intensity_steller3_all[:,-3], pen='g')
-                self.plot_graph_9.plot(wav4,intensity_steller4_all[:,-3], pen='m')
-                self.plot_graph_9.plot(wav5,intensity_steller5_all[:,-3], pen='r')
+                # self.plot_graph_9.clear()
+                # self.plot_graph_9.plot(wav0,intensity_steller0_all[:,-3], pen='k')
+                # self.plot_graph_9.plot(wav1,intensity_steller1_all[:,-3], pen='c')
+                # self.plot_graph_9.plot(wav2,intensity_steller2_all[:,-3], pen='b')
+                # self.plot_graph_9.plot(wav3,intensity_steller3_all[:,-3], pen='g')
+                # self.plot_graph_9.plot(wav4,intensity_steller4_all[:,-3], pen='m')
+                # self.plot_graph_9.plot(wav5,intensity_steller5_all[:,-3], pen='r')
             else:
                 self.plot_graph_7.clear()
                 self.plot_graph_7.plot(wav0,(intensity_steller0_all[:,-1].reshape(2048,)-avg_data_stellar0_bkg.reshape(2048,)), pen='k')
@@ -721,21 +751,21 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.plot_graph_7.plot(wav4,(intensity_steller4_all[:,-1].reshape(2048,)-avg_data_stellar4_bkg.reshape(2048,)), pen='m')
                 self.plot_graph_7.plot(wav5,(intensity_steller5_all[:,-1].reshape(2048,)-avg_data_stellar5_bkg.reshape(2048,)), pen='r')
     
-                self.plot_graph_8.clear()
-                self.plot_graph_8.plot(wav0,(intensity_steller0_all[:,-2].reshape(2048,)-avg_data_stellar0_bkg.reshape(2048,)), pen='k')
-                self.plot_graph_8.plot(wav1,(intensity_steller1_all[:,-2].reshape(2048,)-avg_data_stellar1_bkg.reshape(2048,)), pen='c')
-                self.plot_graph_8.plot(wav2,(intensity_steller2_all[:,-2].reshape(2048,)-avg_data_stellar2_bkg.reshape(2048,)), pen='b')
-                self.plot_graph_8.plot(wav3,(intensity_steller3_all[:,-2].reshape(2048,)-avg_data_stellar3_bkg.reshape(2048,)), pen='g')
-                self.plot_graph_8.plot(wav4,(intensity_steller4_all[:,-2].reshape(2048,)-avg_data_stellar4_bkg.reshape(2048,)), pen='m')
-                self.plot_graph_8.plot(wav5,(intensity_steller5_all[:,-2].reshape(2048,)-avg_data_stellar5_bkg.reshape(2048,)), pen='r')
+                # self.plot_graph_8.clear()
+                # self.plot_graph_8.plot(wav0,(intensity_steller0_all[:,-2].reshape(2048,)-avg_data_stellar0_bkg.reshape(2048,)), pen='k')
+                # self.plot_graph_8.plot(wav1,(intensity_steller1_all[:,-2].reshape(2048,)-avg_data_stellar1_bkg.reshape(2048,)), pen='c')
+                # self.plot_graph_8.plot(wav2,(intensity_steller2_all[:,-2].reshape(2048,)-avg_data_stellar2_bkg.reshape(2048,)), pen='b')
+                # self.plot_graph_8.plot(wav3,(intensity_steller3_all[:,-2].reshape(2048,)-avg_data_stellar3_bkg.reshape(2048,)), pen='g')
+                # self.plot_graph_8.plot(wav4,(intensity_steller4_all[:,-2].reshape(2048,)-avg_data_stellar4_bkg.reshape(2048,)), pen='m')
+                # self.plot_graph_8.plot(wav5,(intensity_steller5_all[:,-2].reshape(2048,)-avg_data_stellar5_bkg.reshape(2048,)), pen='r')
     
-                self.plot_graph_9.clear()
-                self.plot_graph_9.plot(wav0,(intensity_steller0_all[:,-3].reshape(2048,)-avg_data_stellar0_bkg.reshape(2048,)), pen='k')
-                self.plot_graph_9.plot(wav1,(intensity_steller1_all[:,-3].reshape(2048,)-avg_data_stellar1_bkg.reshape(2048,)), pen='c')
-                self.plot_graph_9.plot(wav2,(intensity_steller2_all[:,-3].reshape(2048,)-avg_data_stellar2_bkg.reshape(2048,)), pen='b')
-                self.plot_graph_9.plot(wav3,(intensity_steller3_all[:,-3].reshape(2048,)-avg_data_stellar3_bkg.reshape(2048,)), pen='g')
-                self.plot_graph_9.plot(wav4,(intensity_steller4_all[:,-3].reshape(2048,)-avg_data_stellar4_bkg.reshape(2048,)), pen='m')
-                self.plot_graph_9.plot(wav5,(intensity_steller5_all[:,-3].reshape(2048,)-avg_data_stellar5_bkg.reshape(2048,)), pen='r')
+                # self.plot_graph_9.clear()
+                # self.plot_graph_9.plot(wav0,(intensity_steller0_all[:,-3].reshape(2048,)-avg_data_stellar0_bkg.reshape(2048,)), pen='k')
+                # self.plot_graph_9.plot(wav1,(intensity_steller1_all[:,-3].reshape(2048,)-avg_data_stellar1_bkg.reshape(2048,)), pen='c')
+                # self.plot_graph_9.plot(wav2,(intensity_steller2_all[:,-3].reshape(2048,)-avg_data_stellar2_bkg.reshape(2048,)), pen='b')
+                # self.plot_graph_9.plot(wav3,(intensity_steller3_all[:,-3].reshape(2048,)-avg_data_stellar3_bkg.reshape(2048,)), pen='g')
+                # self.plot_graph_9.plot(wav4,(intensity_steller4_all[:,-3].reshape(2048,)-avg_data_stellar4_bkg.reshape(2048,)), pen='m')
+                # self.plot_graph_9.plot(wav5,(intensity_steller5_all[:,-3].reshape(2048,)-avg_data_stellar5_bkg.reshape(2048,)), pen='r')
             
         else:
             self.plot_graph_7.clear()
@@ -746,21 +776,21 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot_graph_7.plot(wav4,intensity_steller4_all[:,-1], pen='m')
             self.plot_graph_7.plot(wav5,intensity_steller5_all[:,-1], pen='r')
     
-            self.plot_graph_8.clear()
-            self.plot_graph_8.plot(wav0,intensity_steller0_all[:,-2], pen='k')
-            self.plot_graph_8.plot(wav1,intensity_steller1_all[:,-2], pen='c')
-            self.plot_graph_8.plot(wav2,intensity_steller2_all[:,-2], pen='b')
-            self.plot_graph_8.plot(wav3,intensity_steller3_all[:,-2], pen='g')
-            self.plot_graph_8.plot(wav4,intensity_steller4_all[:,-2], pen='m')
-            self.plot_graph_8.plot(wav5,intensity_steller5_all[:,-2], pen='r')
+            # self.plot_graph_8.clear()
+            # self.plot_graph_8.plot(wav0,intensity_steller0_all[:,-2], pen='k')
+            # self.plot_graph_8.plot(wav1,intensity_steller1_all[:,-2], pen='c')
+            # self.plot_graph_8.plot(wav2,intensity_steller2_all[:,-2], pen='b')
+            # self.plot_graph_8.plot(wav3,intensity_steller3_all[:,-2], pen='g')
+            # self.plot_graph_8.plot(wav4,intensity_steller4_all[:,-2], pen='m')
+            # self.plot_graph_8.plot(wav5,intensity_steller5_all[:,-2], pen='r')
     
-            self.plot_graph_9.clear()
-            self.plot_graph_9.plot(wav0,intensity_steller0_all[:,-3], pen='k')
-            self.plot_graph_9.plot(wav1,intensity_steller1_all[:,-3], pen='c')
-            self.plot_graph_9.plot(wav2,intensity_steller2_all[:,-3], pen='b')
-            self.plot_graph_9.plot(wav3,intensity_steller3_all[:,-3], pen='g')
-            self.plot_graph_9.plot(wav4,intensity_steller4_all[:,-3], pen='m')
-            self.plot_graph_9.plot(wav5,intensity_steller5_all[:,-3], pen='r')
+            # self.plot_graph_9.clear()
+            # self.plot_graph_9.plot(wav0,intensity_steller0_all[:,-3], pen='k')
+            # self.plot_graph_9.plot(wav1,intensity_steller1_all[:,-3], pen='c')
+            # self.plot_graph_9.plot(wav2,intensity_steller2_all[:,-3], pen='b')
+            # self.plot_graph_9.plot(wav3,intensity_steller3_all[:,-3], pen='g')
+            # self.plot_graph_9.plot(wav4,intensity_steller4_all[:,-3], pen='m')
+            # self.plot_graph_9.plot(wav5,intensity_steller5_all[:,-3], pen='r')
         
         # Deleting 4th shot data for memory efficiency
         intensity_steller0_all = np.delete(intensity_steller0_all, 0, 1)
@@ -770,8 +800,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         intensity_steller4_all = np.delete(intensity_steller4_all, 0, 1)
         intensity_steller5_all = np.delete(intensity_steller5_all, 0, 1)
         
-        self.plot_graph_10.clear()
-        self.plot_graph_10.plot(data_oci[:,0], data_oci[:,1], pen='r')
+        # self.plot_graph_10.clear()
+        # self.plot_graph_10.plot(data_oci[:,0], data_oci[:,1], pen='r')
         
         #Save Data
         txtnum = self.file_num
@@ -783,7 +813,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         StellarNetSpectrum_500_600nm = hdf.create_dataset('StellarNetSpectrum_500_600nm', data=data_stellar3)
         StellarNetSpectrum_600_700nm = hdf.create_dataset('StellarNetSpectrum_600_700nm', data=data_stellar4)
         StellarNetSpectrum_700_800nm = hdf.create_dataset('StellarNetSpectrum_700_800nm', data=data_stellar5)
-        Ocilloscope_data = hdf.create_dataset('Ocilloscope_data', data=data_oci)
+        # Ocilloscope_data = hdf.create_dataset('Ocilloscope_data', data=data_oci)
 
         abs_pos = [self.x_xps.getStagePosition(self.x_axis), self.y_xps.getStagePosition(self.y_axis)]
         hdf.attrs['LaserEnergy'] = self.Laser_Energy
@@ -797,14 +827,17 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         hdf.attrs['AbsoluteStageLocation'] = abs_pos
         hdf.attrs['OtherNotes'] = self.Other_Notes
         hdf.close()
-            
         self.file_num += 1
         
 # STAGE CONTROL ----------------------------------------------------------------------
         if self.same_loc_shot == self.num_shots_same_loc:
             if self.step_count == self.num_shots:
                 self.end_timer()
-                self.same_loc_shot =1
+                self.same_loc_shot = 1
+                print("time taken post-laser: ", str(time.time() - st))
+
+                # kill timer to maybe stop fucking things up
+                self.end_timer()
                 return
             
             if self.step_count%self.max_cols!=0 and self.rows%2==0:
@@ -824,8 +857,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             
         else:
             self.same_loc_shot +=1
+            
+        print("time taken post-laser: ", str(time.time() - st))
+
 #---------------------------------------------------------------------------------------
-        print(start_time-time.time())
+        # kill timer to maybe stop fucking things up
+        self.end_timer()
+
+        
     def reset(self, spectrometer):
         spectrometer.__del__()
     
@@ -1142,9 +1181,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         '''
         Kills raster timer and resets values.
         '''
-        self.rast_timer.stop()
-        del self.rast_timer
-        
+        try:
+            self.rast_timer.stop()
+            del self.rast_timer
+        except:
+            print("rast_timer.stop() failed, maybe it was already killed?")
+            
         self.rows = 0
         self.step_count = 1
 # -------------------------------------------------------------------------------------  
@@ -1202,8 +1244,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         
-
+#%%
 if __name__ == "__main__":
+    import os
+    print(os.getcwd())
     app = QtWidgets.QApplication(sys.argv)
     window = MyApp()
     window.show()

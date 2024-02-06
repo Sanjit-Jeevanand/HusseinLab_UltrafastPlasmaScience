@@ -87,9 +87,6 @@ smooth = 1
 rm = visa.ResourceManager()
 scope = rm.open_resource('USB0::0x0699::0x03C7::C020817::INSTR')
 
-
-
-
 #Global variables for data saving and plotting
 data_stellar0 = None # wavelength and intensity for stellerNet
 data_stellar1 = None
@@ -120,11 +117,11 @@ class StellerNet_functions:
     
     #function for getting spectrum f rom stellArNet
     def getSpectrum(spectrometer, wav, inttime, scansavg, smooth):
-        # logging.warning('requesting spectrum')
+        logging.warning('requesting spectrum')
         spectrometer.set_config(int_time=inttime, scans_to_avg=scansavg, x_smooth=smooth,temp_comp=True)
         #sn.setTempComp(spectrometer, True) 
         spectrum = spectrometer.read_spectrum()
-        # logging.warning('recieved spectrum')
+        logging.warning('recieved spectrum')
         return spectrum 
     
     # function external triger of stellarNet    
@@ -138,7 +135,7 @@ class StellerNet0TriggerThread(threading.Thread):
         super(StellerNet0TriggerThread,self).__init__()
         self.inttime = inttime
         global data_stellar0
-        # logging.warning('displaying spectrum')
+        logging.warning('displaying spectrum')
         StellerNet_functions.external_trigger(spectrometer0, True)
         data_stellar0 = StellerNet_functions.getSpectrum(spectrometer0, wav0, inttime, scansavg, smooth)
 
@@ -148,7 +145,7 @@ class StellerNet1TriggerThread(threading.Thread):
         super(StellerNet1TriggerThread,self).__init__()
         self.inttime = inttime
         global data_stellar1
-        # logging.warning('displaying spectrum')
+        logging.warning('displaying spectrum')
         StellerNet_functions.external_trigger(spectrometer1,True)
         data_stellar1 = StellerNet_functions.getSpectrum(spectrometer1, wav1, inttime, scansavg, smooth)
 
@@ -158,7 +155,7 @@ class StellerNet2TriggerThread(threading.Thread):
         super(StellerNet2TriggerThread,self).__init__()
         self.inttime = inttime
         global data_stellar2
-        # logging.warning('displaying spectrum')
+        logging.warning('displaying spectrum')
         StellerNet_functions.external_trigger(spectrometer2,True)
         data_stellar2 = StellerNet_functions.getSpectrum(spectrometer2, wav2, inttime, scansavg, smooth)
 
@@ -167,7 +164,7 @@ class StellerNet3TriggerThread(threading.Thread):
         super(StellerNet3TriggerThread,self).__init__()
         self.inttime = inttime
         global data_stellar3
-        # logging.warning('displaying spectrum')
+        logging.warning('displaying spectrum')
         StellerNet_functions.external_trigger(spectrometer3,True)
         data_stellar3 = StellerNet_functions.getSpectrum(spectrometer3, wav3, inttime, scansavg, smooth)
 
@@ -176,7 +173,7 @@ class StellerNet4TriggerThread(threading.Thread):
         super(StellerNet4TriggerThread,self).__init__()
         self.inttime = inttime
         global data_stellar4
-        # logging.warning('displaying spectrum')
+        logging.warning('displaying spectrum')
         StellerNet_functions.external_trigger(spectrometer4,True)
         data_stellar4 = StellerNet_functions.getSpectrum(spectrometer4, wav4, inttime, scansavg, smooth)
 
@@ -185,7 +182,7 @@ class StellerNet5TriggerThread(threading.Thread):
         super(StellerNet5TriggerThread,self).__init__()
         self.inttime = inttime
         global data_stellar5
-        # logging.warning('displaying spectrum')
+        logging.warning('displaying spectrum')
         StellerNet_functions.external_trigger(spectrometer5,True)
         data_stellar5 = StellerNet_functions.getSpectrum(spectrometer5, wav5, inttime, scansavg, smooth)
         
@@ -195,9 +192,8 @@ class ocilloscopeThread(threading.Thread):
         # self.start = start
         global data_oci
         data_oci=self.ocilloscope(data_source, trig_source, v_div, t_div, rec_length)
-        
     def ocilloscope(self, data_source, trig_source, v_div, t_div, rec_length):
-        # # Set up acquisition parameters
+        # Set up acquisition parameters
         scope.write('DATa:SOUrce '+ data_source)   # Select channel 4 as data source
         scope.write('DATa:ENCdg RIBinary')   # Set binary data encoding
         scope.write('WFMPre:XINcr?')   # Query the x-axis increment
@@ -214,8 +210,8 @@ class ocilloscopeThread(threading.Thread):
         scope.write('HOR:SCALE '+ t_div) # Set the horizontal scale to 1ms/div
         
         # Arm the scope and wait for trigger
-        # scope.write('ACQuire:STOPAfter SEQuence')   # Stop acquisition after one sequence
-        # scope.write('ACQuire:STATE ON')   # Start acquisition
+        scope.write('ACQuire:STOPAfter SEQuence')   # Stop acquisition after one sequence
+        scope.write('ACQuire:STATE ON')   # Start acquisition
         scope.query('*OPC?')   # Wait for acquisition to complete
 
         # Read the acquired data
@@ -355,7 +351,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         
         # self.Time_data = 0
         # self.Volts_data=0
-        
 
 
 
@@ -573,7 +568,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.SaveData_dir.setText(dir_path)
         
     def MySpectrometers(self):
-        start_time = time.time()
         # Calling hardware threads   
         StellerNet0TrigThread = threading.Thread(target=StellerNet0TriggerThread, args=(self.inttime, ))
         StellerNet1TrigThread = threading.Thread(target=StellerNet1TriggerThread, args=(self.inttime, ))
@@ -581,8 +575,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         StellerNet3TrigThread = threading.Thread(target=StellerNet3TriggerThread, args=(self.inttime, ))
         StellerNet4TrigThread = threading.Thread(target=StellerNet4TriggerThread, args=(self.inttime, ))
         StellerNet5TrigThread = threading.Thread(target=StellerNet5TriggerThread, args=(self.inttime, ))
-        ocilloscopeTrigThread = threading.Thread(target=ocilloscopeThread, args=(self.data_source,self.trig_source,self.v_div, self.t_div, self.rec_length))
-        Fire = threading.Thread(target=FireThread, args=(10, ))
+        # ocilloscopeTrigThread = threading.Thread(target=ocilloscopeThread, args=(self.data_source,self.trig_source,self.v_div, self.t_div, self.rec_length))
+        # Fire = threading.Thread(target=FireThread, args=(10, ))
 
         # Start Parallel Operation of hardwares
         # ThorlabsTrigThread.start()
@@ -592,9 +586,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         StellerNet3TrigThread.start()
         StellerNet4TrigThread.start()
         StellerNet5TrigThread.start()
-        ocilloscopeTrigThread.start()
-        time.sleep(0.1)
-        Fire.start()
+        # ocilloscopeTrigThread.start()
+        # time.sleep(0.5)
+        # Fire.start()
         # data_oci = np.array(self.Time_data, self.Volts_data)
         
         # ThorlabsTrigThread.join()
@@ -604,8 +598,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         StellerNet3TrigThread.join()
         StellerNet4TrigThread.join()
         StellerNet5TrigThread.join()
-        ocilloscopeTrigThread.join()
-        Fire.join()     
+        # ocilloscopeTrigThread.join()
+        # Fire.join()     
 
         
         # calling variables for sending data from thread
@@ -616,7 +610,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         global data_stellar3
         global data_stellar4
         global data_stellar5        
-        global data_oci
+        # global data_oci
 
         global intensity_steller0_all
         global intensity_steller1_all
@@ -653,7 +647,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         data_stellar4 = data_stellar4.T
         data_stellar5 = data_stellar5.T
         
-        # print(data_stellar0.shape)
+        print(data_stellar0.shape)
         
 
         temp_steller0 = data_stellar0[:,1].reshape(2048,1)
@@ -770,8 +764,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         intensity_steller4_all = np.delete(intensity_steller4_all, 0, 1)
         intensity_steller5_all = np.delete(intensity_steller5_all, 0, 1)
         
-        self.plot_graph_10.clear()
-        self.plot_graph_10.plot(data_oci[:,0], data_oci[:,1], pen='r')
+        # self.plot_graph_10.clear()
+        # self.plot_graph_10.plot(data_oci[:,0], data_oci[:,1], pen='r')
         
         #Save Data
         txtnum = self.file_num
@@ -783,7 +777,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         StellarNetSpectrum_500_600nm = hdf.create_dataset('StellarNetSpectrum_500_600nm', data=data_stellar3)
         StellarNetSpectrum_600_700nm = hdf.create_dataset('StellarNetSpectrum_600_700nm', data=data_stellar4)
         StellarNetSpectrum_700_800nm = hdf.create_dataset('StellarNetSpectrum_700_800nm', data=data_stellar5)
-        Ocilloscope_data = hdf.create_dataset('Ocilloscope_data', data=data_oci)
+        # Ocilloscope_data = hdf.create_dataset('Ocilloscope_data', data=data_oci)
 
         abs_pos = [self.x_xps.getStagePosition(self.x_axis), self.y_xps.getStagePosition(self.y_axis)]
         hdf.attrs['LaserEnergy'] = self.Laser_Energy
@@ -825,7 +819,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.same_loc_shot +=1
 #---------------------------------------------------------------------------------------
-        print(start_time-time.time())
     def reset(self, spectrometer):
         spectrometer.__del__()
     
