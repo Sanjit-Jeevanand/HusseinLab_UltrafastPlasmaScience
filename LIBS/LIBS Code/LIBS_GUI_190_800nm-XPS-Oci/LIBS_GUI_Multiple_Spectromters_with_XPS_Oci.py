@@ -47,7 +47,7 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(qtcreator_file)
 #Connecting all hardwares
 
 # Connect Delay Generator
-ins = ik.srs.SRSDG645.open_serial('COM4', 9600) # dg645
+ins = ik.srs.SRSDG645.open_serial('COM8', 9600) # dg645
 
 # Connect Spectrometers 
 #These spectrometer IDs are device specific and don't change
@@ -776,7 +776,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         #Save Data
         txtnum = self.file_num
         path_SaveData = self.SaveData_dir.toPlainText()
-        hdf = h5py.File (path_SaveData + '/'  + time.strftime("%Y%m%d")+'_LIBS_Spectrum_{}.h5'.format(txtnum), 'w')
+        hdf = h5py.File (path_SaveData + '/'  + time.strftime("%Y%m%d")+'_LIBS_Spectrum_{:05d}.h5'.format(txtnum), 'w')
         StellarNetSpectrum_400_500nm = hdf.create_dataset('StellarNetSpectrum_400_500nm', data=data_stellar0)
         StellarNetSpectrum_300_400nm = hdf.create_dataset('StellarNetSpectrum_300_400nm', data=data_stellar1)
         StellarNetSpectrum_190_300nm = hdf.create_dataset('StellarNetSpectrum_190_300nm', data=data_stellar2)

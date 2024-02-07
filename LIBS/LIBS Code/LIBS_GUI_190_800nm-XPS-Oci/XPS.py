@@ -185,7 +185,7 @@ class XPS(Actuator):
         '''
         
         try:
-            self.xps = NewportXPS("192.168.0.254", username = "Administrator", password = "Administrator")
+            self.xps = NewportXPS("192.168.0.181", username = "Administrator", password = "Administrator")
         except:
             print("XPS connection cannot be established.")
         self.groupList = {}
