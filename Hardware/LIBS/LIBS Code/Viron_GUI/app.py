@@ -882,6 +882,7 @@ class Window(QMainWindow, Ui_MainWindow):
         if self.currentstate != 'fire':
             # set to internal trigger
             self.laser.send_command("$QSON 1")
+            self.laser.send_command("$TRIG II")
             
         if self.laser.set_fire():
             self.currentstate = 'fire'
@@ -927,6 +928,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print("fired mah lazor")  
             
     def toggle_external_fire(self):
+        self.currentstate = 'external'
         if self.laser.set_external_trigger():
             self.viron_external_fire_button.setStyleSheet("background-color : darkgreen")
             self.viron_standby_button.setStyleSheet("background-color : black")
