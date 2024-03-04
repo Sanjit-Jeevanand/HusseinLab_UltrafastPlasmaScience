@@ -15,12 +15,12 @@ else:
         devices = [sn.array_get_spec(i) for i in range(num_connected)]
         devices = sorted(devices, key=lambda x: x[1][0])
         spectrometers = [x[0] for x in devices]
-        waves = [x[1] for x in devices]
+        waves = [wavelengthCalibration(x['device'].get_config()["coeffs"]) for x in spectrometers]
         
         return spectrometers, waves
                     
     def wavelengthCalibration(coeffs):
-        pixels = np.arange(2048)#.reshape(-1, 1)
+        pixels = np.arange(2048)
         wave = coeffs[2]+coeffs[0]*pixels/2+coeffs[1]*(pixels/2)**2+coeffs[3]*(pixels/2)**3
         return wave
 
@@ -65,14 +65,14 @@ else:
         for i in range(len(specs)):
             print(specs[i]['device'].get_device_id(), wavs[i][0], wavs[i][-1])
         
-        spectrometers_running = True
-        threads = []
-        for spec, wav, name in zip(specs, wavs, names):
-            threads.append(threading.Thread(target=StellerNetTriggerThread, args=(spec, wav, 1, name)))
+        # spectrometers_running = True
+        # threads = []
+        # for spec, wav, name in zip(specs, wavs, names):
+        #     threads.append(threading.Thread(target=StellerNetTriggerThread, args=(spec, wav, 1, name)))
 
-        for i in threads:
-            i.start()
-        print("all spectrometers initalized")
-        input()
+        # for i in threads:
+        #     i.start()
+        # print("all spectrometers initalized")
+        # input()
 
         spectrometers_running = False
