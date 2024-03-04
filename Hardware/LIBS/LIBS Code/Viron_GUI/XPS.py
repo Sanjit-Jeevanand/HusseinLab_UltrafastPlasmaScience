@@ -172,7 +172,7 @@ class XPS(Actuator):
     '''
     
     
-    def __init__(self):
+    def __init__(self, ip_str):
         '''
         Initializes the XPS class.
         
@@ -185,7 +185,7 @@ class XPS(Actuator):
         '''
         
         try:
-            self.xps = NewportXPS("192.168.0.254", username = "Administrator", password = "Administrator")
+            self.xps = NewportXPS(ip_str, username = "Administrator", password = "Administrator")
         except:
             print("XPS connection cannot be established.")
             raise XPSnotFound()

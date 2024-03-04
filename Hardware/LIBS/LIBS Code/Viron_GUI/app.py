@@ -119,8 +119,9 @@ class Window(QMainWindow, Ui_MainWindow):
         # ------------------------------------------------------------------------------------------
         # init xpses
         try:
-            self.x_xps = XPS()
-            self.y_xps = XPS()
+            ip = "192.168.0.254"
+            self.x_xps = XPS(ip)
+            self.y_xps = XPS(ip)
         except XPSnotFound:
             QMessageBox.critical(self, 'Error', 'Unable to connect to XPS. Motion control will be unavailable.')
             self.xps_enable_button.setEnabled(False)
