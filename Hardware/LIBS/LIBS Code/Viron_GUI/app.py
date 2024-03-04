@@ -182,23 +182,24 @@ class Window(QMainWindow, Ui_MainWindow):
             self.go_home_button.clicked.connect(lambda: self.ref_commands('return'))
 
             # # Raster Input Boxes
-            self.raster_verify_input_button.clicked.connect(self.verify_raster_inputs) 
-            self.auto_step_length_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-            self.auto_sample_length_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
-            self.auto_sample_width_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            ## TODO: FIX ME AS THERE"S NO AUTO_SAMPLE_LENGTH_ENTRY
+            # self.raster_verify_input_button.clicked.connect(self.verify_raster_inputs) 
+            # self.auto_step_length_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            # self.auto_sample_length_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
+            # self.auto_sample_width_entry.setValidator(QtGui.QDoubleValidator(0.10, 50.00, 2))
             # self.num_shots_line.setEnabled(False)
             # self.num_shots_line.textChanged.connect(lambda: self.raster_inp('num_shots'))
             
             # # Raster Controls
             self.auto_raster_button.setEnabled(False)
-            # ToDo:
+            # TODO:
             # self.auto_raster_button.clicked.connect(self.start_timer)
             # self.auto_raster_kill_button.clicked.connect(self.end_timer)
             
             # Timer and Printing of Stage Location
-            self.print_timer = QTimer(self, interval = 1000, timeout = self.print_location)
-            self.print_timer.start()
-            self.print_location()
+            # self.print_timer = QTimer(self, interval = 1000, timeout = self.print_location)
+            # self.print_timer.start()
+            # self.print_location()
             
             # ------------------------------------------------------------------------------------------
         
