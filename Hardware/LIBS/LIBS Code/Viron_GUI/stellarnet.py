@@ -62,11 +62,12 @@ else:
 
 
     class SpectraPlotter:
-        def __init__(self, wavs):
+        def __init__(self, wavs, ax):
             print("plotter init")
             global spectrometers_running
             self.specs = [None, None, None, None, None, None]
             self.wavs = wavs
+            self.ax = ax
             self.t = threading.Thread(target=self.plotSpectra)
             self.awaitSpectra()
             
@@ -84,11 +85,11 @@ else:
         def plotSpectra(self):
             while None in self.specs:
                 time.sleep(0.1)
-                
+            self.ax.cla()
             # do the plotting here
-            # for i, j in zip(self.wavs, self.specs):    
-            #     plt.plot(i, j)
-            # plt.show()
+            for i, j in zip(self.wavs, self.specs):    
+                self.ax.plot(i, j)
+            ax.figure.canvas.draw()
             
             print("all spectra obtained")
             print(self.specs)
@@ -106,8 +107,12 @@ else:
         for i in range(len(specs)):
             print(specs[i]['device'].get_device_id(), wavs[i][0], wavs[i][-1])
         
+        plt.ion()
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        # plt.show()
         spectrometers_running = True
-        spectraplotter = SpectraPlotter(wavs)
+        spectraplotter = SpectraPlotter(wavs, ax)
         threads = []
         for spec, wav, name in zip(specs, wavs, names):
             threads.append(threading.Thread(target=StellerNetTriggerThread, args=(spec, wav, 1, name, spectraplotter)))
