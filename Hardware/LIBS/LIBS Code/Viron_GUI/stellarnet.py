@@ -10,9 +10,11 @@ else:
     
     # set pauses function?
     global spectrometers_running
-
+    spectrometers_running = False
     def init_spectrometers():
         num_connected = len(sn.find_devices())
+        if num_connected == 0:
+            return None, None
         devices = [sn.array_get_spec(i) for i in range(num_connected)]
         devices = sorted(devices, key=lambda x: x[1][0])
         spectrometers = [x[0] for x in devices]
@@ -24,6 +26,17 @@ else:
         pixels = np.arange(2048)
         wave = coeffs[2]+coeffs[0]*pixels/2+coeffs[1]*(pixels/2)**2+coeffs[3]*(pixels/2)**3
         return wave
+
+    def spawnSpectrometerThreads(specs, wavs, inttime, plot):
+        names = [i for i in range(len(specs))]
+        threads = []
+        for spec, wav, name in zip(specs, wavs, names):
+            threads.append(threading.Thread(target=StellerNetTriggerThread, args=(spec, wav, inttime, name, plot)))
+        return threads
+    
+    def startSpectrometerThreads(threads):
+        for i in threads:
+            i.start()
 
     class StellerNetTriggerThread(threading.Thread):
         def __init__(self, spec, wav, inttime, name, spectraplotter):
@@ -62,42 +75,49 @@ else:
 
 
     class SpectraPlotter:
-        def __init__(self, wavs, ax):
+        def __init__(self, wavs, ax, plotfunc):
             print("plotter init")
             global spectrometers_running
             self.specs = [None, None, None, None, None, None]
             self.wavs = wavs
             self.ax = ax
             self.t = threading.Thread(target=self.plotSpectra)
-            self.awaitSpectra()
+            self.plotfunc = plotfunc
+            self.data_plotted = False
             
         def updateSpectra(self, target, spectra):
             "0: 200-300; 1: 300-400, etc"
             target = int(target)
-            print(target)
             self.specs[target] = spectra
         
         def resetSpectra(self):
             self.specs = [None, None, None, None, None, None]
-            self.t = threading.Thread(target=self.plotSpectra)
-            self.awaitSpectra()
+            # self.t = threading.Thread(target=self.plotSpectra)
+            # self.awaitSpectra()
+            self.plotSpectra()
             
         def plotSpectra(self):
             while None in self.specs:
                 time.sleep(0.1)
-            self.ax.cla()
-            # do the plotting here
-            for i, j in zip(self.wavs, self.specs):    
-                self.ax.plot(i, j)
-            ax.figure.canvas.draw()
+            print("mf should be plotting now")
+            while not self.data_plotted:
+                time.sleep(0.1)
+            self.data_plotted = False
+            # self.plotfunc(self.specs, self.wavs)
             
-            print("all spectra obtained")
-            print(self.specs)
+            # for i, j in zip(self.wavs, self.specs):    
+            #     self.ax.plot(i, j, clear=True)
+            
+            
+            # ax.figure.canvas.draw()
+            
+            # print("all spectra obtained")
+            # print(self.specs)
             self.resetSpectra()
             
         def awaitSpectra(self):
-            if spectrometers_running:
-                self.t.start()
+            # if spectrometers_running:
+            self.t.start()
  
 
     if __name__ == '__main__':

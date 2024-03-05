@@ -13,9 +13,11 @@ from PyQt5.QtCore import QDate
 from pyqtgraph import PlotWidget
 from telnetGUI import TelnetSessionGUI
 from Viron import VironLaser
+from stellarnet import init_spectrometers, spawnSpectrometerThreads, startSpectrometerThreads, SpectraPlotter
+import stellarnet
 from XPS import XPS, XPSnotFound
 import threading
-
+import time
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -41,6 +43,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.spectra_plot_1.showAxis('top')
         self.spectra_plot_1.getAxis('top').setStyle(showValues=False)
         self.spectra_plot_1.getAxis('right').setStyle(showValues=False)
+        
+        
         # ------------------------------------------------------------------------------------------
         # bottom buttons
         self.fire_button.clicked.connect(self.fire_laser_single)
@@ -68,6 +72,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.Trigger_mode_select.currentIndexChanged.connect(self._dg645_handle_trigger_select)
         self.get_all_values_button.clicked.connect(self._dg645_get_all_values)
         # ----------------------------------------------------------------------------------------------
+        # Spectrometers
+        self.specs = []
+        self.waves = []
+        self.spectrometerthreadlist = []
+        
         
         # ------------------------------------------------------------------------------------------
         # oscilloscope stuff:
@@ -206,6 +215,11 @@ class Window(QMainWindow, Ui_MainWindow):
             # ----------------------------------------------------------------------------------------------
         # DIAGNOSTIC INITALIZATION
         # ----------------------------------------------------------------------------------------------
+        if self._init_spectrometers():
+            self.are_specs_connected = True
+            self.spectraplotter.awaitSpectra()
+            self.spectrometers_isconnected_label.setText("Connected")
+            self.spectrometers_isconnected_label.setStyleSheet("color: green")
         if self._init_dg645():
             self.is_dg645_connected = True
             self.dg645_isconnected_label.setText("Connected")
@@ -214,11 +228,12 @@ class Window(QMainWindow, Ui_MainWindow):
             self.is_scope_connected = True
             self.scope_isconnected_label.setText("Connected")
             self.scope_isconnected_label.setStyleSheet("color: green")
+
         self._init_viron()
         
 
         # ----------------------------------------------------------------------------------------------
-    
+        
     
     '''
         __  ______  ____  
@@ -476,7 +491,7 @@ class Window(QMainWindow, Ui_MainWindow):
     '''    
     def _init_dg645(self):
         try:
-            self.dg645 = DG645("COM4")
+            self.dg645 = DG645("COM8")
         except:
             QMessageBox.critical(self, 'Error', 'Unable to connect to DG645 - Check your com port and ensure it was closed properly before connecting again')
             return False
@@ -988,16 +1003,32 @@ class Window(QMainWindow, Ui_MainWindow):
      _____________________________________________________________________________                          
     '''
     
-    def init_spectrometers(self):
-        pass
+    def _init_spectrometers(self):
+        self.specs, self.waves = init_spectrometers()
+        if len(self.specs) > 0:
+            self.spectraplotter = SpectraPlotter(self.waves, self.spectra_plot_1, self.update_plot)
+            self.spectrometerthreadlist = spawnSpectrometerThreads(self.specs, self.waves, 1, self.spectraplotter)
+            return True
+        else:
+            QMessageBox.critical(self, 'Error', 'Unable to connect to spectrometers. May the person who made the drivers step on a lego')
+            return False
     
     def arm_spectrometers(self):
-        pass
+        if not stellarnet.spectrometers_running:
+            stellarnet.spectrometers_running = True
+            startSpectrometerThreads(self.spectrometerthreadlist)
+            
     
-    def join_spectrometers(self):
-        pass
+    def disarm_spectrometers(self):
+        if stellarnet.spectrometers_running:
+            stellarnet.spectrometers_running = False
     
-     
+    def update_plot(self,):
+        while None in self.spectraplotter.specs:
+            time.sleep(0.01)
+        self.spectra_plot_1.clear()
+        # # do the plotting here
+        self.spectra_plot_1.multiDataPlot(x=self.spectraplotter.wavs, y=self.spectraplotter.specs)
      
     '''_______________________________________________________________________________________________________'''
      
@@ -1005,18 +1036,20 @@ class Window(QMainWindow, Ui_MainWindow):
     def fire_laser_single(self):
         if self.are_specs_connected:
             self.arm_spectrometers()
-            pass
+            time.sleep(0.1)
+            
         if self.is_scope_connected:
             scopethread = threading.Thread(target=self.scope.wait_for_trigger_and_get_data)
             scopethread.start()
-        if self.is_viron_connected:
-            self.fire()
+            
+        # if self.is_viron_connected:
+        self.fire()
             
         if self.are_specs_connected:
             # join spectrometers
-            self.join_spectrometers()
+            self.update_plot()
             # process data in separate thread
-            pass
+        
         if self.is_scope_connected:
             scopedata = scopethread.join()
             # asynchronusly update the scope plot
@@ -1040,9 +1073,12 @@ class Window(QMainWindow, Ui_MainWindow):
             return False
         
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setStyleSheet(qdarktheme.load_stylesheet())
-    # qdarktheme.setup_theme()
-    win = Window()
-    win.show()
-    sys.exit(app.exec())
+    try:
+        app = QApplication(sys.argv)
+        app.setStyleSheet(qdarktheme.load_stylesheet())
+        # qdarktheme.setup_theme()
+        win = Window()
+        win.show()
+        sys.exit(app.exec())
+    except Exception as e:
+        print(e)
