@@ -9,8 +9,9 @@ except:
 else:
     
     # set pauses function?
-    global spectrometers_running
+    global spectrometers_running, inttime
     spectrometers_running = False
+    inttime = 1
     def init_spectrometers():
         num_connected = len(sn.find_devices())
         if num_connected == 0:
@@ -27,11 +28,11 @@ else:
         wave = coeffs[2]+coeffs[0]*pixels/2+coeffs[1]*(pixels/2)**2+coeffs[3]*(pixels/2)**3
         return wave
 
-    def spawnSpectrometerThreads(specs, wavs, inttime, plot):
+    def spawnSpectrometerThreads(specs, wavs, plot):
         names = [i for i in range(len(specs))]
         threads = []
         for spec, wav, name in zip(specs, wavs, names):
-            threads.append(threading.Thread(target=StellerNetTriggerThread, args=(spec, wav, inttime, name, plot)))
+            threads.append(threading.Thread(target=StellerNetTriggerThread, args=(spec, wav, name, plot)))
         return threads
     
     def startSpectrometerThreads(threads):
@@ -39,10 +40,10 @@ else:
             i.start()
 
     class StellerNetTriggerThread(threading.Thread):
-        def __init__(self, spec, wav, inttime, name, spectraplotter):
+        def __init__(self, spec, wav, name, spectraplotter):
             global spectrometers_running
             super(StellerNetTriggerThread,self).__init__()
-            self.inttime = inttime
+            # self.inttime = inttime
             self.spec = spec
             self.wav = wav
             self.name = name
@@ -55,7 +56,7 @@ else:
         def do_stuff(self):
             while spectrometers_running:
                 self.external_trigger(self.spec, True)
-                data_stellar0 = self.getSpectrum(self.spec, self.wav, self.inttime, 1, 1)
+                data_stellar0 = self.getSpectrum(self.spec, self.wav, 1, 1)
                 self.plotter.updateSpectra(self.name, data_stellar0)
                 self.now = time.time() - self.st
                 print(str(self.now)[:6] + ' ' + str(self.name) + " fired at " + str(1 / (self.now - self.last))[:4] + ' Hz')
@@ -63,7 +64,7 @@ else:
             sn.reset(self.spec)
             print('spectrometer has been yeeted')
 
-        def getSpectrum(self, spectrometer, wav, inttime, scansavg, smooth):
+        def getSpectrum(self, spectrometer, wav, scansavg, smooth):
             spectrometer['device'].set_config(int_time=inttime, scans_to_avg=scansavg, x_smooth=smooth)
             sn.setTempComp(spectrometer, True) 
             # spectrum = sn.array_spectrum(spectrometer, wav)

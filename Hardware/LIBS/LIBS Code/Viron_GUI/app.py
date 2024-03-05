@@ -1007,7 +1007,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.specs, self.waves = init_spectrometers()
         if len(self.specs) > 0:
             self.spectraplotter = SpectraPlotter(self.waves, self.spectra_plot_1, self.update_plot)
-            self.spectrometerthreadlist = spawnSpectrometerThreads(self.specs, self.waves, 1, self.spectraplotter)
+            self.spectrometerthreadlist = spawnSpectrometerThreads(self.specs, self.waves, self.spectraplotter)
             return True
         else:
             QMessageBox.critical(self, 'Error', 'Unable to connect to spectrometers. May the person who made the drivers step on a lego')
@@ -1018,7 +1018,9 @@ class Window(QMainWindow, Ui_MainWindow):
             stellarnet.spectrometers_running = True
             startSpectrometerThreads(self.spectrometerthreadlist)
             
-    
+    def update_integration_time(self, inttime):
+        stellarnet.inttime = inttime
+        
     def disarm_spectrometers(self):
         if stellarnet.spectrometers_running:
             stellarnet.spectrometers_running = False
@@ -1055,7 +1057,9 @@ class Window(QMainWindow, Ui_MainWindow):
             # asynchronusly update the scope plot
             threading.Thread(target=self._update_scope_plot, args=(scopedata,)).start()
         
-        
+        print(stellarnet.inttime)
+        self.update_integration_time(15)
+        print(stellarnet.inttime)
         # need to save data here too
             
     def fire(self):
