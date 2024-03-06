@@ -56,17 +56,19 @@ else:
         def do_stuff(self):
             while spectrometers_running:
                 self.external_trigger(self.spec, True)
+                print(inttime)
                 data_stellar0 = self.getSpectrum(self.spec, self.wav, 1, 1)
                 self.plotter.updateSpectra(self.name, data_stellar0)
-                self.now = time.time() - self.st
-                print(str(self.now)[:6] + ' ' + str(self.name) + " fired at " + str(1 / (self.now - self.last))[:4] + ' Hz')
-                self.last = self.now
+                # self.now = time.time() - self.st
+                # print(str(self.now)[:6] + ' ' + str(self.name) + " fired at " + str(1 / (self.now - self.last))[:4] + ' Hz')
+                # self.last = self.now
             sn.reset(self.spec)
             print('spectrometer has been yeeted')
 
         def getSpectrum(self, spectrometer, wav, scansavg, smooth):
-            spectrometer['device'].set_config(int_time=inttime, scans_to_avg=scansavg, x_smooth=smooth)
-            sn.setTempComp(spectrometer, True) 
+            spectrometer['device'].set_config(int_time=inttime, scans_to_avg=scansavg, x_smooth=smooth, tempcomp=1)
+            spectrometer['device']._set_device_timing()
+            # sn.setTempComp(spectrometer, True) 
             # spectrum = sn.array_spectrum(spectrometer, wav)
             spectrum = spectrometer['device'].read_spectrum()
             return spectrum 
@@ -100,7 +102,6 @@ else:
         def plotSpectra(self):
             while None in self.specs:
                 time.sleep(0.1)
-            print("mf should be plotting now")
             while not self.data_plotted:
                 time.sleep(0.1)
             self.data_plotted = False

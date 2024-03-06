@@ -76,6 +76,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.specs = []
         self.waves = []
         self.spectrometerthreadlist = []
+        self.set_int_time_button.clicked.connect(self.update_integration_time)
         
         
         # ------------------------------------------------------------------------------------------
@@ -1018,8 +1019,13 @@ class Window(QMainWindow, Ui_MainWindow):
             stellarnet.spectrometers_running = True
             startSpectrometerThreads(self.spectrometerthreadlist)
             
-    def update_integration_time(self, inttime):
-        stellarnet.inttime = inttime
+    def update_integration_time(self):
+        try:
+            inttime = int(self.int_time_line_edit.text())
+        except ValueError:
+            QMessageBox.critical(self, 'Error', 'Invalid Integration Time')
+        else:
+            stellarnet.inttime = inttime
         
     def disarm_spectrometers(self):
         if stellarnet.spectrometers_running:
@@ -1057,9 +1063,7 @@ class Window(QMainWindow, Ui_MainWindow):
             # asynchronusly update the scope plot
             threading.Thread(target=self._update_scope_plot, args=(scopedata,)).start()
         
-        print(stellarnet.inttime)
-        self.update_integration_time(15)
-        print(stellarnet.inttime)
+
         # need to save data here too
             
     def fire(self):

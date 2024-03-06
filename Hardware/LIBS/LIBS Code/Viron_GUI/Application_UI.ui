@@ -70,7 +70,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="delay_generator_tab">
      <attribute name="title">
@@ -1672,7 +1672,7 @@
         <x>20</x>
         <y>20</y>
         <width>1051</width>
-        <height>451</height>
+        <height>421</height>
        </rect>
       </property>
       <property name="minimumSize">
@@ -1688,8 +1688,44 @@
        </size>
       </property>
      </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>399</x>
+        <y>450</y>
+        <width>311</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="int_time_label_2">
+         <property name="text">
+          <string>Integration Time (ms)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="int_time_line_edit">
+         <property name="text">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="set_int_time_button">
+         <property name="text">
+          <string>Set</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
     <widget class="QWidget" name="spectra_plots_tab">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <attribute name="title">
       <string>Spectra</string>
      </attribute>
