@@ -6,18 +6,23 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import QTimer, QTime
 from PyQt5.uic import loadUi
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtWidgets
 import qdarktheme
 from gui import Ui_MainWindow
 from PyQt5.QtCore import QDate
 from pyqtgraph import PlotWidget
 from telnetGUI import TelnetSessionGUI
 from Viron import VironLaser
-from stellarnet import init_spectrometers, spawnSpectrometerThreads, startSpectrometerThreads, SpectraPlotter
-import stellarnet
+try:
+    from stellarnet import init_spectrometers, spawnSpectrometerThreads, startSpectrometerThreads, SpectraPlotter
+    import stellarnet
+except:
+    stellarnet_not_installed = True
 from XPS import XPS, XPSnotFound
 import threading
 import time
+import h5py
+from datetime import datetime
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -73,10 +78,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.get_all_values_button.clicked.connect(self._dg645_get_all_values)
         # ----------------------------------------------------------------------------------------------
         # Spectrometers
-        self.specs = []
-        self.waves = []
-        self.spectrometerthreadlist = []
-        self.set_int_time_button.clicked.connect(self.update_integration_time)
+        if not stellarnet_not_installed:
+            self.specs = []
+            self.waves = []
+            self.spectrometerthreadlist = []
+            self.set_int_time_button.clicked.connect(self.update_integration_time)
         
         
         # ------------------------------------------------------------------------------------------
@@ -216,11 +222,15 @@ class Window(QMainWindow, Ui_MainWindow):
             # ----------------------------------------------------------------------------------------------
         # DIAGNOSTIC INITALIZATION
         # ----------------------------------------------------------------------------------------------
-        if self._init_spectrometers():
-            self.are_specs_connected = True
-            self.spectraplotter.awaitSpectra()
-            self.spectrometers_isconnected_label.setText("Connected")
-            self.spectrometers_isconnected_label.setStyleSheet("color: green")
+        self.SaveData_dir = '.'    # This can be updated via the file-choose directory button
+        self.file_num = 0
+        self.actionSet_Directory.triggered.connect(self.set_directory)
+        if not stellarnet_not_installed:
+            if self._init_spectrometers():
+                self.are_specs_connected = True
+                self.spectraplotter.awaitSpectra()
+                self.spectrometers_isconnected_label.setText("Connected")
+                self.spectrometers_isconnected_label.setStyleSheet("color: green")
         if self._init_dg645():
             self.is_dg645_connected = True
             self.dg645_isconnected_label.setText("Connected")
@@ -1041,6 +1051,66 @@ class Window(QMainWindow, Ui_MainWindow):
     '''_______________________________________________________________________________________________________'''
      
      
+     
+    """_______________________________________________________________________________________________________"""
+    """
+     _   _____________ _____ 
+    | | | |  _  \  ___|  ___|
+    | |_| | | | | |_  |___ \ 
+    |  _  | | | |  _|     \ \
+    | | | | |/ /| |   /\__/ /
+    \_| |_/___/ \_|   \____/ 
+                            
+     """
+
+    def set_directory(self):
+        '''
+        Opens a file browser in directory of LIBSGUI.py file.
+        '''
+        dir_path=QtWidgets.QFileDialog.getExistingDirectory(self,"Choose Directory","./")  # Change the 3rd parameter ("./") to change directory that browser opens in.
+        self.SaveData_dir = dir_path
+        self.save_data_dir_label.setText(dir_path)
+
+    def get_MetaData(self):
+        md = {}
+        md["Time"] = datetime.now().strftime('%Y-%m-%dT%H%M%S%f')[:-3]
+        md['LaserEnergy'] = self.laser_energy_entry.text()
+        md['LaserWavelength'] = self.wavelength_entry.text()
+        md['LaserPulseDuration'] = self.pulse_duration_entry.text()
+        md["sampleID"] = self.sample_id_entry.text()
+        md["FocalLength"] = self.focal_length_entry.text()
+        md["IntegrationTime"] = self.integration_time_entry.text()
+        md['FiberAngle'] = self.fiber_angle_entry.text()
+        md["BackgroundSpectrum"] = self.background_spectra_present_select.currentText()
+        md["AdditionalInfo"] = self.additional_info_entry.text()
+        return md
+
+    def save_data_h5(self):
+        #Save Data
+        md = self.get_MetaData()
+        hdf = h5py.File (self.SaveData_dir + '/' + "LIBS_Spectrum_{:05d}".format(self.file_num) + "_" + md["Time"] +'.h5', 'w')
+        if self.are_specs_connected:
+            StellarNetSpectrum_400_500nm = hdf.create_dataset('StellarNetSpectrum_400_500nm', data=data_stellar0)
+            StellarNetSpectrum_300_400nm = hdf.create_dataset('StellarNetSpectrum_300_400nm', data=data_stellar1)
+            StellarNetSpectrum_190_300nm = hdf.create_dataset('StellarNetSpectrum_190_300nm', data=data_stellar2)
+            StellarNetSpectrum_500_600nm = hdf.create_dataset('StellarNetSpectrum_500_600nm', data=data_stellar3)
+            StellarNetSpectrum_600_700nm = hdf.create_dataset('StellarNetSpectrum_600_700nm', data=data_stellar4)
+            StellarNetSpectrum_700_800nm = hdf.create_dataset('StellarNetSpectrum_700_800nm', data=data_stellar5)
+        if self.is_scope_connected:
+            Ocilloscope_data = hdf.create_dataset('Ocilloscope_data', data=data_oci)
+        if self.is_xps_connected:
+            abs_pos = [self.x_xps.getStagePosition(self.x_axis), self.y_xps.getStagePosition(self.y_axis)]
+        
+        # deal with metadata:
+        for i in md:
+            hdf.attrs[i] = md[i]
+        hdf.close()
+            
+        self.file_num += 1
+        self.shot_number_label.setText(str(self.file_num))
+    """_______________________________________________________________________________________________________"""
+     
+     
     def fire_laser_single(self):
         if self.are_specs_connected:
             self.arm_spectrometers()
@@ -1050,8 +1120,8 @@ class Window(QMainWindow, Ui_MainWindow):
             scopethread = threading.Thread(target=self.scope.wait_for_trigger_and_get_data)
             scopethread.start()
             
-        # if self.is_viron_connected:
-        self.fire()
+        if self.is_dg645_connected:
+            self.fire()
             
         if self.are_specs_connected:
             # join spectrometers
@@ -1065,7 +1135,8 @@ class Window(QMainWindow, Ui_MainWindow):
         
 
         # need to save data here too
-            
+        self.save_data_h5()
+        
     def fire(self):
         self.dg645.sendcmd('*TRG') 
          
