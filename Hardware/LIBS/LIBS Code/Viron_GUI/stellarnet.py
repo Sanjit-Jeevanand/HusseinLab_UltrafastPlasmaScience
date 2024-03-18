@@ -60,7 +60,7 @@ else:
         def do_stuff(self):
             while spectrometers_running:
                 self.external_trigger(self.spec, True)
-                print(inttime)
+                # print(inttime)
                 data_stellar0 = self.getSpectrum(self.spec, self.wav, 1, 1)
                 self.plotter.updateSpectra(self.name, data_stellar0)
                 # self.now = time.time() - self.st

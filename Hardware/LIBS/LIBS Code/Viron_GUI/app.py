@@ -14,6 +14,7 @@ from pyqtgraph import PlotWidget
 from telnetGUI import TelnetSessionGUI
 from Viron import VironLaser
 try:
+    stellarnet_not_installed = False
     from stellarnet import init_spectrometers, spawnSpectrometerThreads, startSpectrometerThreads, SpectraPlotter
     import stellarnet
 except:
@@ -557,7 +558,7 @@ class Window(QMainWindow, Ui_MainWindow):
     def _dg645_handle_trigger_select(self):
         src = self.Trigger_mode_select.currentText()
         self.dg645.set_trigger_source(src)
-        print(src)
+        # print(src)
     '''_______________________________________________________________________________________________________'''   
     
     
@@ -1088,11 +1089,12 @@ class Window(QMainWindow, Ui_MainWindow):
     def save_data_h5(self):
         #Save Data
         md = self.get_MetaData()
-        hdf = h5py.File (self.SaveData_dir + '/' + "LIBS_Spectrum_{:05d}".format(self.file_num) + "_" + md["Time"] +'.h5', 'w')
+        hdf = h5py.File(self.SaveData_dir + '/' + "LIBS_Spectrum_{:05d}".format(self.file_num) + "_" + md["Time"] +'.h5', 'w')
+        
         if self.are_specs_connected:
             wavs, spectras = self.spectraplotter.getSpectra()
-            for i, j in zip(wavs, spectras):
-                hdf.create_dataset('Spectrum_'+str(min[i])+"_"+str(max(i)), data=j)
+            for i, x in enumerate(spectras):
+                hdf.create_dataset('Spectrum_'+str(min(wavs[i]))[:3]+"_"+str(max(wavs[i]))[:3], data=[wavs[i], x])
 
         if self.is_scope_connected:
             # Ocilloscope_data = hdf.create_dataset('Ocilloscope_data', data=data_oci)
@@ -1123,9 +1125,7 @@ class Window(QMainWindow, Ui_MainWindow):
         if self.is_dg645_connected:
             self.fire()
             
-        if self.are_specs_connected:
-            # join spectrometers
-            self.update_plot()
+
             # process data in separate thread
         
         if self.is_scope_connected:
@@ -1137,6 +1137,11 @@ class Window(QMainWindow, Ui_MainWindow):
         # need to save data here too
         self.save_data_h5()
         
+        if self.are_specs_connected:
+            # join spectrometers
+            self.update_plot()
+            
+            
     def fire(self):
         self.dg645.sendcmd('*TRG') 
          
@@ -1160,4 +1165,4 @@ if __name__ == "__main__":
         win.show()
         sys.exit(app.exec())
     except Exception as e:
-        print(e)
+        print("Exception: ", e)
