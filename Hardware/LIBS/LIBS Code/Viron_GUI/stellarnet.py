@@ -124,7 +124,9 @@ else:
         def awaitSpectra(self):
             # if spectrometers_running:
             self.t.start()
- 
+            
+        def getSpectra(self):
+            return self.wavs, self.specs
 
     if __name__ == '__main__':
         specs, wavs = init_spectrometers()

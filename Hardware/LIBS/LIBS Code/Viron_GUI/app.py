@@ -1090,14 +1090,14 @@ class Window(QMainWindow, Ui_MainWindow):
         md = self.get_MetaData()
         hdf = h5py.File (self.SaveData_dir + '/' + "LIBS_Spectrum_{:05d}".format(self.file_num) + "_" + md["Time"] +'.h5', 'w')
         if self.are_specs_connected:
-            StellarNetSpectrum_400_500nm = hdf.create_dataset('StellarNetSpectrum_400_500nm', data=data_stellar0)
-            StellarNetSpectrum_300_400nm = hdf.create_dataset('StellarNetSpectrum_300_400nm', data=data_stellar1)
-            StellarNetSpectrum_190_300nm = hdf.create_dataset('StellarNetSpectrum_190_300nm', data=data_stellar2)
-            StellarNetSpectrum_500_600nm = hdf.create_dataset('StellarNetSpectrum_500_600nm', data=data_stellar3)
-            StellarNetSpectrum_600_700nm = hdf.create_dataset('StellarNetSpectrum_600_700nm', data=data_stellar4)
-            StellarNetSpectrum_700_800nm = hdf.create_dataset('StellarNetSpectrum_700_800nm', data=data_stellar5)
+            wavs, spectras = self.spectraplotter.getSpectra()
+            for i, j in zip(wavs, spectras):
+                hdf.create_dataset('Spectrum_'+str(min[i])+"_"+str(max(i)), data=j)
+
         if self.is_scope_connected:
-            Ocilloscope_data = hdf.create_dataset('Ocilloscope_data', data=data_oci)
+            # Ocilloscope_data = hdf.create_dataset('Ocilloscope_data', data=data_oci)
+            pass
+        
         if self.is_xps_connected:
             abs_pos = [self.x_xps.getStagePosition(self.x_axis), self.y_xps.getStagePosition(self.y_axis)]
         
