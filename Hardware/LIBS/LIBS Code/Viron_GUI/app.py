@@ -1093,7 +1093,6 @@ class Window(QMainWindow, Ui_MainWindow):
         
         if self.are_specs_connected:
             wavs, spectras = self.spectraplotter.getSpectra()
-            print(len(wavs), len(spectras))
             
             for i, x in enumerate(spectras):
                 hdf.create_dataset('Spectrum_'+str(min(wavs[i]))[:3]+"_"+str(max(wavs[i]))[:3], data=[wavs[i], x])
