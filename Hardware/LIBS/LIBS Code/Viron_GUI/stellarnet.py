@@ -85,7 +85,7 @@ else:
         def __init__(self, wavs, ax, plotfunc):
             print("plotter init")
             global spectrometers_running
-            self.specs = [None, None, None, None, None, None]
+            self.specs = [None for i in wavs]
             self.wavs = wavs
             self.ax = ax
             self.t = threading.Thread(target=self.plotSpectra)
@@ -98,7 +98,7 @@ else:
             self.specs[target] = spectra
         
         def resetSpectra(self):
-            self.specs = [None, None, None, None, None, None]
+            self.specs = [None for i in self.wavs]
             # self.t = threading.Thread(target=self.plotSpectra)
             # self.awaitSpectra()
             self.plotSpectra()
