@@ -2,10 +2,14 @@ import threading, time
 import numpy as np
 import matplotlib.pyplot as plt
 import usb
+
+class StellarnetDriverNotFound(Exception):
+    pass
+
 try:
     import stellarnet_driver3 as sn
 except:
-    raise("Stellarnet Driver failed to load :(")
+    raise StellarnetDriverNotFound("Stellarnet Driver failed to load :(")
 else:
     
     # set pauses function?
@@ -144,3 +148,5 @@ else:
         input()
 
         spectrometers_running = False
+        
+        
