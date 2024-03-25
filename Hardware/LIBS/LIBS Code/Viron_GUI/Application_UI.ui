@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1111</width>
-    <height>860</height>
+    <height>893</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -66,7 +66,7 @@
       <x>0</x>
       <y>100</y>
       <width>1121</width>
-      <height>521</height>
+      <height>591</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -1722,14 +1722,6 @@
       </layout>
      </widget>
     </widget>
-    <widget class="QWidget" name="spectra_plots_tab">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <attribute name="title">
-      <string>Spectra</string>
-     </attribute>
-    </widget>
     <widget class="QWidget" name="XPS_tab">
      <attribute name="title">
       <string>XPS Stage</string>
@@ -3021,11 +3013,11 @@
         <x>0</x>
         <y>0</y>
         <width>1111</width>
-        <height>531</height>
+        <height>591</height>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="laser_control_tab">
        <attribute name="title">
@@ -3238,25 +3230,6 @@
          <string>Laser Status:</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_4">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>310</y>
-          <width>431</width>
-          <height>181</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="pixmap">
-         <pixmap>../../../../../../../Downloads/firinmahlazor.png</pixmap>
-        </property>
-        <property name="scaledContents">
-         <bool>true</bool>
-        </property>
-       </widget>
        <widget class="QLabel" name="laser_status_label">
         <property name="geometry">
          <rect>
@@ -3317,7 +3290,7 @@
           <x>230</x>
           <y>20</y>
           <width>601</width>
-          <height>481</height>
+          <height>501</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="tngui_box"/>
@@ -3439,9 +3412,9 @@
     <property name="geometry">
      <rect>
       <x>330</x>
-      <y>630</y>
+      <y>710</y>
       <width>221</width>
-      <height>171</height>
+      <height>141</height>
      </rect>
     </property>
     <property name="font">
@@ -3460,9 +3433,9 @@
     <property name="geometry">
      <rect>
       <x>560</x>
-      <y>630</y>
+      <y>710</y>
       <width>221</width>
-      <height>171</height>
+      <height>141</height>
      </rect>
     </property>
     <property name="font">

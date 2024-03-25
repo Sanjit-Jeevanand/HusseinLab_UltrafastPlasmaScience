@@ -1163,7 +1163,7 @@ class Window(QMainWindow, Ui_MainWindow):
 if __name__ == "__main__":
     try:
         app = QApplication(sys.argv)
-        # app.setStyleSheet(qdarktheme.load_stylesheet())
+        app.setStyleSheet(qdarktheme.load_stylesheet())
         # qdarktheme.setup_theme()
         win = Window()
         win.show()
