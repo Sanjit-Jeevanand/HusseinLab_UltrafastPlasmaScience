@@ -35,8 +35,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.clock_timer.start()
         
         # Dicates if h5 files are saved
-        self.save = True
-        
+        self.save = None
+        self.set_save(True)
         
         # init variables for if stuff is connected:
         self.is_dg645_connected = False
@@ -1126,8 +1126,8 @@ class Window(QMainWindow, Ui_MainWindow):
     """_______________________________________________________________________________________________________"""
      
     def set_save(self, state):
-        print("Save State: ", state)
         self.save = state
+        self.savedata_label.setText(str(state))
      
     def fire_laser_single(self):
         if self.are_specs_connected:
