@@ -34,6 +34,10 @@ class Window(QMainWindow, Ui_MainWindow):
         self.clock_timer = QTimer(self, interval=1000, timeout=self._update_clock)
         self.clock_timer.start()
         
+        # Dicates if h5 files are saved
+        self.save = True
+        
+        
         # init variables for if stuff is connected:
         self.is_dg645_connected = False
         self.is_scope_connected = False
@@ -226,6 +230,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.SaveData_dir = '.'    # This can be updated via the file-choose directory button
         self.file_num = 0
         self.actionSet_Directory.triggered.connect(self.set_directory)
+        
+        self.actionSet_DontSave.triggered.connect(lambda: self.set_save(False))
+        
+        self.actionSave.triggered.connect(lambda: self.set_save(True))
+        
         if not stellarnet_not_installed:
             if self._init_spectrometers():
                 self.are_specs_connected = True
@@ -1116,6 +1125,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.shot_number_label.setText(str(self.file_num))
     """_______________________________________________________________________________________________________"""
      
+    def set_save(self, state):
+        print("Save State: ", state)
+        self.save = state
      
     def fire_laser_single(self):
         if self.are_specs_connected:
@@ -1139,7 +1151,8 @@ class Window(QMainWindow, Ui_MainWindow):
         
 
         # need to save data here too
-        self.save_data_h5()
+        if self.save:
+            self.save_data_h5()
         
         if self.are_specs_connected:
             # join spectrometers
