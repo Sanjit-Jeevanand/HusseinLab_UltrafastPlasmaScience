@@ -1,21 +1,31 @@
-from instrumental import instrument, list_instruments
+from instrumental.drivers import instrument
+from instrumental.drivers.spectrometers.thorlabs_ccs import list_instruments
 from pyvisa import ResourceManager
 import time
 import numpy as np
 import threading
 
+import sys, os
+
+
+
 class ThorlabsSpecThread(threading.Thread):
     
     def __init__(self, exposureTime):
-        super(ThorlabsSpecThread, self).__init__()
+        cwd = os.getcwd()
+        sys.path.append(os.path.join(*cwd.split("\\")[:cwd.split("\\").index("HusseinLab_UltrafastPlasmaScience")+1], 'Hardware', "Thorlabs CCS200"))
+
+        # super(ThorlabsSpecThread, self).__init__()
         #Spectrometer initialization
         rm = ResourceManager()
         res = rm.list_resources('?*::?*')
+        print(res)
         
         if res:
             paramsets = list_instruments()
+            print(paramsets)
             self.spec = instrument(paramsets[0], reopen_policy="reuse") # thorlabs ccs200
-
+            print(self.spec.get_device_info())
             
             # self.running = False
             # self.wave = self.spec._wavelength_array
@@ -24,8 +34,8 @@ class ThorlabsSpecThread(threading.Thread):
             # self.spec.start_single_scan()
             # self.intensity = self.spec.get_scan_data()
 
-    def __del__(self):
-        self.wait()
+    # def __del__(self):
+    #     self.wait()
 
     def run(self):
         self.running = True
@@ -66,3 +76,6 @@ class ThorlabsSpecThread(threading.Thread):
                 print(self.spec.get_integration_time())
         self.resume()
         
+if __name__ == "__main__":
+    i = ThorlabsSpecThread(1)
+    # print(i.getIntensity())

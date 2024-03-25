@@ -1017,6 +1017,9 @@ class Window(QMainWindow, Ui_MainWindow):
     
     def _init_spectrometers(self):
         self.specs, self.waves = init_spectrometers()
+        if self.specs == None or self.waves == None:
+            QMessageBox.critical(self, 'Error', 'Unable to connect to spectrometers. None detected')
+            return False
         if len(self.specs) > 0:
             self.spectraplotter = SpectraPlotter(self.waves, self.spectra_plot_1, self.update_plot)
             self.spectrometerthreadlist = spawnSpectrometerThreads(self.specs, self.waves, self.spectraplotter)
@@ -1160,7 +1163,7 @@ class Window(QMainWindow, Ui_MainWindow):
 if __name__ == "__main__":
     try:
         app = QApplication(sys.argv)
-        app.setStyleSheet(qdarktheme.load_stylesheet())
+        # app.setStyleSheet(qdarktheme.load_stylesheet())
         # qdarktheme.setup_theme()
         win = Window()
         win.show()

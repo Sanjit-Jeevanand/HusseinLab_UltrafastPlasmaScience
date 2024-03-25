@@ -17,15 +17,23 @@ else:
     spectrometers_running = False
     inttime = 1
     def init_spectrometers():
-        num_connected = len(sn.find_devices())
-        if num_connected == 0:
+        try:
+            s = sn.find_devices()
+        except:
             return None, None
-        devices = [sn.array_get_spec(i) for i in range(num_connected)]
-        devices = sorted(devices, key=lambda x: x[1][0])
-        spectrometers = [x[0] for x in devices]
-        waves = [wavelengthCalibration(x['device'].get_config()["coeffs"]) for x in spectrometers]
-        
-        return spectrometers, waves
+        else:
+            if s is None:
+                return None, None
+            else:
+                num_connected = len(sn.find_devices())
+                if num_connected == 0:
+                    return None, None
+                devices = [sn.array_get_spec(i) for i in range(num_connected)]
+                devices = sorted(devices, key=lambda x: x[1][0])
+                spectrometers = [x[0] for x in devices]
+                waves = [wavelengthCalibration(x['device'].get_config()["coeffs"]) for x in spectrometers]
+                
+                return spectrometers, waves
                     
     def wavelengthCalibration(coeffs):
         pixels = np.arange(2048)
